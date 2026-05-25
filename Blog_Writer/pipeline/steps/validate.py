@@ -21,9 +21,11 @@ ARTIFACT_SCHEMA = {
 	"additionalProperties": True,
 }
 
+_rubric = yaml.safe_load(Path("config/rubric.yaml").read_text(encoding="utf-8"))
+
 LENGTH_MIN = 300
 LENGTH_MAX = 4000
-QUALITY_MIN = 2.5
+QUALITY_MIN = _rubric.get("min_total", 2.5)
 BANNED_WORDS = ["무조건", "완벽보장", "절대안전", "반드시성공"]
 
 # ----- 2. 개별 체크 ----

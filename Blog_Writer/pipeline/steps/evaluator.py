@@ -77,7 +77,7 @@ def evaluate(artifact_path: Path, verdict_path: Path) -> None:
             "weights": weights,
             "weighted_total": round(weighted_total, 4),
         },
-        "evaluator_model": "gemini-2.0-flash",
+        "evaluator_model": "gemini-2.5-flash-lite",
         "evaluated_at": datetime.now(timezone.utc).isoformat(),
         "verdict": "PASS" if weighted_total >= min_total else "REJECT",
     }

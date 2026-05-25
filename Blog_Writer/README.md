@@ -2,7 +2,7 @@
 
 AI 기반 블로그 초안 생성 파이프라인 (v0)
 
-GitHub: https://github.com/pigyechan/Blog_Writer
+GitHub: https://github.com/pigyechan/PROJECT/tree/master/Blog_Writer
 
 ---
 

@@ -1,5 +1,5 @@
 """
-사용법: python create_input.py
+사용법 (Blog_Writer/ 루트에서 실행): python pipeline/create_input.py
 topic, materials, tone을 입력하면 runs/{timestamp_uuid}/01_input.json 을 생성한다.
 """
 

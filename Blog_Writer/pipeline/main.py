@@ -1,7 +1,7 @@
 """
-사용법:
-  python main.py                        # runs/ 에서 가장 최신 폴더 자동 선택
-  python main.py runs/20260523_120000_abcd1234   # 특정 run 디렉터리 지정
+사용법 (Blog_Writer/ 루트에서 실행):
+  python pipeline/main.py                              # runs/ 에서 가장 최신 폴더 자동 선택
+  python pipeline/main.py runs/20260523_120000_abcd1234   # 특정 run 디렉터리 지정
 """
 
 import json

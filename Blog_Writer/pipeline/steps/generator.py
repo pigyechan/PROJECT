@@ -39,7 +39,7 @@ def generate(input_path: Path, output_path: Path) -> None:
         "brief_hash": brief_data["brief_hash"],
         "content": content,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "generator_model": "gemini-2.0-flash",
+        "generator_model": "gemini-2.5-flash-lite",
         # 중요: 자기 평가 점수를 여기 넣지 않는다.
     }
     output_path.write_text(json.dumps(artifact, ensure_ascii=False, indent=2), encoding="utf-8")
