@@ -29,8 +29,7 @@ python main.py ../inputs/input_{hash}.json
 ## API
 
 - **모델**: Gemini API (Google)
-  - Analyze / Draft / Eval / Refine / Report: `gemini-2.0-flash`
-  - Critique: `gemini-2.5-flash-lite`
+  - 전체 단계: `gemini-2.5-flash-lite`
 - **환경변수**: `GEMINI_API_KEY` 필요
 
 ---
@@ -75,7 +74,9 @@ Career_Planner/
 │       ├── validate.py      — Step 5-V (코드 기반 이중 검증)
 │       └── refiner.py       — Step 6
 ├── prompts/                 — 단계별 시스템 프롬프트
-├── config/rubric.yaml       — 6축 루브릭 (가중치 합 1.0)
+├── config/
+│   ├── rubric.yaml          — 6축 루브릭 (가중치 합 1.0)
+│   └── user_background.json — 사용자 경력·목표 (create_input.py에서 자동 로드)
 ├── schemas/                 — JSON 스키마
 ├── inputs/                  — create_input.py 출력 저장소
 └── runs/{timestamp_hash}/   — 실행 결과
@@ -87,7 +88,7 @@ Career_Planner/
 
 - 코드 수정 전 이유 설명
 - 커밋/푸시는 사용자가 명시적으로 요청할 때만
-- 파일 하나 변경 시 연관 파일 확인 (rubric.yaml ↔ eval_system.md ↔ DESIGN.md)
+- 파일 하나 변경 시 연관 파일 확인 (rubric.yaml ↔ eval_system.md ↔ validate.py)
 - 하드코딩 금지. 설정값은 yaml/json 분리.
 
 ## Cross-file 연관 관계
@@ -97,4 +98,4 @@ Career_Planner/
 | `config/rubric.yaml` | `prompts/eval_system.md` (축 일치), `pipeline/steps/validate.py` (파싱) |
 | `schemas/*.json` | `pipeline/steps/validate.py`, 해당 schema를 출력하는 step |
 | `prompts/*.md` | 해당 프롬프트를 읽는 `steps/*.py` |
-| `pipeline/main.py` | `docs/DESIGN.md` 흐름도 |
+| `pipeline/main.py` | `pipeline/steps/*.py` (단계 호출 순서 확인) |
