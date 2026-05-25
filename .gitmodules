@@ -1,0 +1,9 @@
+[submodule "Blog_Writer"]
+	path = Blog_Writer
+	url = https://github.com/pigyechan/Blog_Writer.git
+[submodule "Grit_Project"]
+	path = Grit_Project
+	url = https://github.com/pigyechan/Grit_Project.git
+[submodule "Career_Planner"]
+	path = Career_Planner
+	url = https://github.com/pigyechan/Career_Planner.git
