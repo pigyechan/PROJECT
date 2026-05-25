@@ -28,7 +28,10 @@ python create_input.py
 
 ### 4. 파이프라인 실행
 
+`create_input.py` 종료 시 출력되는 명령어를 그대로 복사해서 실행하세요 (`pipeline/` 디렉토리에서).
+
 ```bash
+# create_input.py가 출력하는 명령어 형식
 python main.py ../inputs/input_{hash}.json
 ```
 
