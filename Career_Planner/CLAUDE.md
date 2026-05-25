@@ -88,14 +88,27 @@ Career_Planner/
 
 - 코드 수정 전 이유 설명
 - 커밋/푸시는 사용자가 명시적으로 요청할 때만
-- 파일 하나 변경 시 연관 파일 확인 (rubric.yaml ↔ eval_system.md ↔ validate.py)
 - 하드코딩 금지. 설정값은 yaml/json 분리.
+
+### 연관 파일 동기화 규칙 (필수)
+
+파일을 수정할 때 아래 절차를 반드시 따른다.
+
+1. **수정 전**: Cross-file 연관 관계 테이블에서 변경 파일의 연관 파일 목록을 확인한다.
+2. **수정 후**: 연관 파일을 직접 읽고, 변경 내용과 일치하지 않는 부분이 있으면 즉시 수정한다.
+3. **보고**: 연관 파일을 수정했다면 사용자에게 어떤 파일을 왜 수정했는지 함께 알린다.
+   연관 파일에 수정이 불필요했다면 "확인 완료" 한 줄로 알린다.
+
+> 연관 파일 수정 없이 단일 파일 수정으로 작업을 종료하지 않는다.
 
 ## Cross-file 연관 관계
 
-| 변경 파일 | 확인할 파일 |
-|---|---|
-| `config/rubric.yaml` | `prompts/eval_system.md` (축 일치), `pipeline/steps/validate.py` (파싱) |
-| `schemas/*.json` | `pipeline/steps/validate.py`, 해당 schema를 출력하는 step |
-| `prompts/*.md` | 해당 프롬프트를 읽는 `steps/*.py` |
-| `pipeline/main.py` | `pipeline/steps/*.py` (단계 호출 순서 확인) |
+| 변경 파일 | 확인·수정할 파일 | 확인 포인트 |
+|---|---|---|
+| `config/rubric.yaml` | `prompts/eval_system.md` | 축 이름·가중치·점수 기준 일치 여부 |
+| `config/rubric.yaml` | `pipeline/steps/validate.py` | 파싱 키 이름, threshold 값 일치 여부 |
+| `schemas/*.json` | 해당 schema를 출력하는 `steps/*.py` | 출력 필드와 schema required 항목 일치 여부 |
+| `prompts/*.md` | 해당 프롬프트를 읽는 `steps/*.py` | 입력·출력 필드명 일치 여부 |
+| `pipeline/steps/*.py` | `prompts/` 대응 프롬프트 파일 | 전달 필드와 프롬프트 입력 사양 일치 여부 |
+| `pipeline/main.py` | `pipeline/steps/*.py` | 단계 호출 순서, 파일 경로 인자 일치 여부 |
+| `README.md` | `requirements.txt`, `config/user_background.json` | 설치 명령·환경변수·실행 명령 최신 반영 여부 |
