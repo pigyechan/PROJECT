@@ -40,8 +40,8 @@ python main.py ../inputs/input_{hash}.json
 |---|---|
 | `01_input.json` | 입력 채용공고 원본 |
 | `02_analysis.json` | 분류 + 숨은 기대치 분석 |
-| `02b_report.md` | **시장 패턴 리포트 (제출용)** |
-| `03_draft.md` | **포지셔닝 초안 (제출용)** |
+| `02b_report.md` | **시장 패턴 리포트** |
+| `03_draft.md` | **포지셔닝 초안** |
 | `memo_template.md` | **소화 메모 템플릿 (직접 작성)** |
 
 ## 파이프라인 구조
