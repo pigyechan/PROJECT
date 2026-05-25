@@ -7,14 +7,14 @@
 ### 1. 패키지 설치
 
 ```bash
-pip install anthropic pyyaml jsonschema
+pip install -r requirements.txt
 ```
 
 ### 2. API 키 설정
 
 ```bash
 # Windows PowerShell
-$env:ANTHROPIC_API_KEY = "your-api-key"
+$env:GEMINI_API_KEY = "your-api-key"
 ```
 
 ### 3. 채용공고 입력
