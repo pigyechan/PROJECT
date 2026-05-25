@@ -20,6 +20,12 @@ C:\PROJECT\
 │   ├── schemas\                ← input / output / verdict JSON schema
 │   ├── runs\                   ← 실행 결과 (타임스탬프_uuid 폴더)
 │   └── docs\                   ← DESIGN.md / PIPELINE_GUIDE.md / EXECUTION_LOG.md
+├── Career_Planner\             ← 채용공고 분석 + 포지셔닝 초안 파이프라인 (완성)
+│   ├── pipeline\main.py        ← 6단계 파이프라인 진입점
+│   ├── pipeline\steps\         ← analyzer / reporter / drafter / critic / evaluator / validate / refiner
+│   ├── prompts\                ← 단계별 시스템 프롬프트
+│   ├── config\rubric.yaml      ← 6축 루브릭 + user_background.json
+│   └── schemas\                ← input / analysis / draft / verdict JSON schema
 └── Grit_Project\               ← Git 워크플로우 학습 프로젝트
     └── CLAUDE.md               ← 브랜치 전략, 커밋 규칙
 ```
@@ -40,7 +46,7 @@ C:\PROJECT\
 ### Blog_Writer 파이프라인 (v0) — 2026-05-23 ~ 2026-05-24 완료
 - **무엇**: 주제 + 재료(materials) → 블로그 초안 자동 생성
 - **구조**: Gen → Critique → Eval → Refine 4단계 루프 (최대 3회 반복)
-- **모델**: Gemini 2.0 Flash (Gen/Eval) + Gemini 2.5 Flash Lite (Critique)
+- **모델**: 전체 단계 `gemini-2.5-flash-lite` (Gemini API)
 - **상태**: 완성. 2회 실행 기록 있음 (EXECUTION_LOG.md 참고)
 - **주요 교훈**: PIPELINE_GUIDE.md에 정리됨
 
@@ -55,10 +61,10 @@ C:\PROJECT\
 ### Career_Planner 파이프라인 — 2026-05-25 구현 완료
 - **위치**: `C:\PROJECT\Career_Planner\`
 - **목적**: 채용공고 20~30개 텍스트 → 시장 패턴 분석 + StoryBrand 7요소 포지셔닝 초안
-- **API**: Anthropic Claude (claude-sonnet-4-6 / claude-haiku-4-5-20251001)
+- **모델**: 전체 단계 `gemini-2.5-flash-lite` (Gemini API) / 환경변수: `GEMINI_API_KEY`
 - **핵심 설계**: Analyze 단계가 표면 스킬이 아닌 "숨은 기대치" 해석 (예: "Kafka/Redis" → "대용량 트래픽 경험")
 - **제출 산출물**: 분류 로그 / 시장 패턴 리포트 / 포지셔닝 초안 / 소화 메모 템플릿
-- **상태**: 코드 완성. 아직 실행 전. ANTHROPIC_API_KEY 환경변수 필요.
+- **상태**: 코드 완성 및 유지보수 완료. GEMINI_API_KEY 환경변수 설정 후 실행 가능.
 
 ---
 
@@ -74,11 +80,11 @@ C:\PROJECT\
 
 ## 다음 할 일
 
-- [ ] `ANTHROPIC_API_KEY` 환경변수 설정 후 파이프라인 실행
+- [ ] `GEMINI_API_KEY` 환경변수 설정 후 Career_Planner 파이프라인 실행
 - [ ] `cd C:\PROJECT\Career_Planner\pipeline && python create_input.py` 로 채용공고 입력
 - [ ] 실행 결과 확인 후 필요 시 프롬프트/루브릭 조정
 - [ ] 제출용 파일 완성 (03_draft.md, 02b_report.md, memo_template.md 직접 작성)
 
 ---
 
-*마지막 업데이트: 2026-05-25*
+*마지막 업데이트: 2026-05-26*
