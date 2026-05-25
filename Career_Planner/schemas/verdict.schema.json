@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["brief_hash", "scores", "reasons", "weighted_total", "status"],
+  "properties": {
+    "brief_hash": { "type": "string" },
+    "scores": {
+      "type": "object",
+      "required": ["evidence", "alignment", "authenticity", "completeness", "differentiation", "specificity"],
+      "properties": {
+        "evidence":        { "type": "number", "minimum": 1, "maximum": 5 },
+        "alignment":       { "type": "number", "minimum": 1, "maximum": 5 },
+        "authenticity":    { "type": "number", "minimum": 1, "maximum": 5 },
+        "completeness":    { "type": "number", "minimum": 1, "maximum": 5 },
+        "differentiation": { "type": "number", "minimum": 1, "maximum": 5 },
+        "specificity":     { "type": "number", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "reasons":        { "type": "object" },
+    "weighted_total": { "type": "number" },
+    "status":         { "type": "string", "enum": ["PASS", "REJECT"] }
+  }
+}

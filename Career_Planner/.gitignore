@@ -1,0 +1,12 @@
+# 실행 결과 (로컬에서만 관리)
+runs/
+inputs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# API 키
+.env*

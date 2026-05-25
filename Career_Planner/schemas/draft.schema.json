@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "brief_hash",
+    "target_company",
+    "problem",
+    "guide_competencies",
+    "plan_90days",
+    "cta",
+    "failure_risk",
+    "transformation",
+    "full_text"
+  ],
+  "properties": {
+    "brief_hash":          { "type": "string" },
+    "target_company":      { "type": "string" },
+    "problem":             { "type": "string" },
+    "guide_competencies":  { "type": "string" },
+    "plan_90days":         { "type": "string" },
+    "cta":                 { "type": "string" },
+    "failure_risk":        { "type": "string" },
+    "transformation":      { "type": "string" },
+    "full_text":           { "type": "string" }
+  }
+}

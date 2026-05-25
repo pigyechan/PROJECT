@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["brief_hash", "classified", "patterns"],
+  "properties": {
+    "brief_hash": { "type": "string" },
+    "classified": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "company", "title", "company_size", "domain", "key_requirements", "hidden_expectations"],
+        "properties": {
+          "id":           { "type": "integer" },
+          "company":      { "type": "string" },
+          "title":        { "type": "string" },
+          "company_size": { "type": "string", "enum": ["startup", "mid", "large", "enterprise"] },
+          "domain":       { "type": "string" },
+          "key_requirements": { "type": "array", "items": { "type": "string" } },
+          "hidden_expectations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["surface", "hidden"],
+              "properties": {
+                "surface": { "type": "string" },
+                "hidden":  { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "patterns": {
+      "type": "object",
+      "required": ["top_skills", "hidden_patterns", "top_domains", "company_size_distribution", "recurring_themes"],
+      "properties": {
+        "top_skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill", "count", "percentage"],
+            "properties": {
+              "skill":      { "type": "string" },
+              "count":      { "type": "integer" },
+              "percentage": { "type": "number" }
+            }
+          }
+        },
+        "hidden_patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pattern", "surface_signals", "count", "percentage"],
+            "properties": {
+              "pattern":         { "type": "string" },
+              "surface_signals": { "type": "array", "items": { "type": "string" } },
+              "count":           { "type": "integer" },
+              "percentage":      { "type": "number" }
+            }
+          }
+        },
+        "top_domains":              { "type": "array", "items": { "type": "string" } },
+        "company_size_distribution": {
+          "type": "object",
+          "properties": {
+            "startup":    { "type": "integer" },
+            "mid":        { "type": "integer" },
+            "large":      { "type": "integer" },
+            "enterprise": { "type": "integer" }
+          }
+        },
+        "recurring_themes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
