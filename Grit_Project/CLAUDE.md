@@ -10,7 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Project Status
 - 아직 코드가 없는 초기 단계(2026-05-16 기준).
-- 언어/프레임워크 미확정. 확정 전까지 **Java**를 기본으로 사용.
+- 언어: **Java 17 이상**.
+- 빌드 도구: **Gradle**
 - 지향 방향: Java 웹 백엔드 (Spring Boot 계열) + Oracle DB 중심.
 - 프로젝트 코드가 생기면 아래 섹션을 채울 것.
 
@@ -18,7 +19,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > [AI 지시] 이 섹션은 비어 있음. 코드가 존재하는데 명령어가 없으면 사용자에게 빌드 명령어를 확정할 때가 됐는지 물어볼 것.
 
 ## Test
-> [AI 지시] 이 섹션은 비어 있음. 테스트 파일이 존재하는데 명령어가 없으면 사용자에게 테스트 전략을 정할 때가 됐는지 물어볼 것.
+- 단위테스트: JUnit 5, Mockito, AssertJ
+- 인수테스트(BDD): Cucumber-JVM (Gherkin)
+
+> [AI 지시] 테스트 실행 명령어가 없으면 사용자에게 확정할 때가 됐는지 물어볼 것.
 
 # Git Workflow
 
@@ -77,3 +81,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - 예: "JPA는 생산성이 높지만 복잡한 쿼리에서 성능 튜닝이 어렵습니다. MyBatis는 SQL을 직접 작성하므로 제어권이 높지만 코드량이 늘어납니다."
 - 문맥이 불분명하면 구현 전에 질문할 것.
 - 설명 순서: **왜(Why) → 어떻게(How)**. 개념 설명 시 C#/.NET 경험에 빗댄 비유를 활용해도 좋음.
+- 사용자는 Gradle, JUnit 5, Mockito, AssertJ, Cucumber-JVM 모두 처음 사용함. 이 도구들이 등장하면 코드 제시와 함께 "이 코드에서 이 도구가 왜 쓰였는지, 어떻게 동작하는지"를 함께 설명할 것.
