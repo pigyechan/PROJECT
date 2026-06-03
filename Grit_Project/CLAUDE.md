@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Project Status
 - 아직 코드가 없는 초기 단계(2026-05-16 기준).
-- 언어: **Java 17 이상**.
+- 언어: **Java 24 이상**.
 - 빌드 도구: **Gradle**
 - 지향 방향: Java 웹 백엔드 (Spring Boot 계열) + Oracle DB 중심.
 - 프로젝트 코드가 생기면 아래 섹션을 채울 것.
