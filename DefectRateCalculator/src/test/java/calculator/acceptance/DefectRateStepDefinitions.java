@@ -1,4 +1,4 @@
-package calculator;
+package calculator.acceptance;
 
 import io.cucumber.java.en.*;
 
