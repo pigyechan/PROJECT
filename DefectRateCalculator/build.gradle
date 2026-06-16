@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.quality'
+version = '1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    // Java 17+ 에서 Mockito 가 동적으로 클래스를 수정할 수 있도록 허용
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+}
