@@ -1,4 +1,4 @@
-package calculator;
+package calculator.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
