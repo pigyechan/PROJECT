@@ -39,6 +39,9 @@ class DefectRateServiceTest {
 
     // ══════════════════════════════════════════════════════
     // RED    : DefectRateService 없으므로 컴파일 에러
+
+
+
     // GREEN  : Service 구현 — findById → 계산 → saveResult
     // REFACTOR: null 처리를 Service 안에서 명시적 예외로 분리
     // ══════════════════════════════════════════════════════
