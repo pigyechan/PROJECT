@@ -27,7 +27,7 @@ def refine(artifact_path: Path, critique_path: Path, verdict_path: Path, refined
 
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     response = client.models.generate_content(
-        model="gemini-2.5-flash-lite",
+        model="gemini-3.1-flash-lite",
         contents=json.dumps(user_message, ensure_ascii=False),
         config=types.GenerateContentConfig(
             system_instruction=REFINE_SYSTEM_PROMPT,
@@ -51,6 +51,6 @@ def refine(artifact_path: Path, critique_path: Path, verdict_path: Path, refined
         "should_iterate": result.get("should_iterate", False),
         "iterate_reason": result.get("iterate_reason", ""),
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "generator_model": "gemini-2.5-flash-lite",
+        "generator_model": "gemini-3.1-flash-lite",
     }
     refined_path.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")

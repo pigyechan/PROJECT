@@ -37,7 +37,7 @@ def evaluate(artifact_path: Path, verdict_path: Path) -> None:
     }
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     response = client.models.generate_content(
-        model="gemini-2.5-flash-lite",
+        model="gemini-3.1-flash-lite",
         contents=json.dumps(user_message, ensure_ascii=False),
         config=types.GenerateContentConfig(
             system_instruction=EVAL_SYSTEM_PROMPT,
@@ -77,7 +77,7 @@ def evaluate(artifact_path: Path, verdict_path: Path) -> None:
             "weights": weights,
             "weighted_total": round(weighted_total, 4),
         },
-        "evaluator_model": "gemini-2.5-flash-lite",
+        "evaluator_model": "gemini-3.1-flash-lite",
         "evaluated_at": datetime.now(timezone.utc).isoformat(),
         "verdict": "PASS" if weighted_total >= min_total else "REJECT",
     }

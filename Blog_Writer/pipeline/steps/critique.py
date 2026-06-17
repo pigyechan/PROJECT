@@ -22,7 +22,7 @@ def critique(artifact_path: Path, critique_path: Path) -> None:
 
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     response = client.models.generate_content(
-        model="gemini-2.5-flash-lite",
+        model="gemini-3.1-flash-lite",
         contents=json.dumps(user_message, ensure_ascii=False),
         config=types.GenerateContentConfig(
             system_instruction=CRITIQUE_SYSTEM_PROMPT,
@@ -46,7 +46,7 @@ def critique(artifact_path: Path, critique_path: Path) -> None:
     output = {
         "brief_hash": artifact["brief_hash"],
         "weaknesses": weaknesses,
-        "critique_model": "gemini-2.5-flash-lite",
+        "critique_model": "gemini-3.1-flash-lite",
         "critiqued_at": datetime.now(timezone.utc).isoformat(),
     }
     critique_path.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
