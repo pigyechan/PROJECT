@@ -55,3 +55,16 @@ notes: |
   - min_total 미만이면 validate.py가 REJECT
   - 평가자 프롬프트에는 '5점은 드뭅니다. 평균 3.0 기준' 문구 포함 필수
   - 가중치 합 검증은 validate.py 실행 시 1회 수행 (assert)
+
+precision_rules:
+  description: "기술 블로그에서 도메인 용어를 혼용하면 evidence 점수를 1점 감점한다"
+  violations:
+    - wrong: "인수테스트 결과를 RED/GREEN으로 표현"
+      correct: "PASS/FAIL"
+      reason: "RED→GREEN→REFACTOR는 TDD 개발 사이클 전용 용어"
+    - wrong: "단위 테스트와 인수테스트 혼용"
+      correct: "각각의 정확한 명칭"
+      reason: "범위와 목적이 다름"
+    - wrong: "mock, stub, fake 혼용"
+      correct: "각각의 정확한 명칭"
+      reason: "테스트 더블 종류별 의미가 다름"
