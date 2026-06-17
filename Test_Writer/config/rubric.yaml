@@ -1,0 +1,35 @@
+version: 1
+axes:
+  - name: coverage
+    weight: 0.30
+    scale:
+      1: "정상 케이스만 있음. 경계값·실패 케이스 전혀 없음"
+      3: "일부 경계값 포함, 실패 케이스 1개 이하"
+      5: "경계값(min/max/zero/negative) + 실패 케이스 2개 이상 명시"
+
+  - name: unambiguity
+    weight: 0.25
+    scale:
+      1: "'정상 동작', 'should work' 등 모호한 Then만 있음"
+      3: "일부 Then은 구체적, 일부는 모호"
+      5: "모든 Then이 구체적 반환값·예외 타입·상태를 명시"
+
+  - name: independence
+    weight: 0.25
+    scale:
+      1: "시나리오 간 공유 상태·실행 순서 의존 다수"
+      3: "대부분 독립적이나 1-2개 순서 의존 있음"
+      5: "모든 시나리오가 독립적으로 실행 가능"
+
+  - name: executability
+    weight: 0.20
+    scale:
+      1: "추상적 설명만 있어 Step 정의 구현 불가"
+      3: "일부 Step은 구현 가능하나 나머지는 모호"
+      5: "모든 Given/When/Then이 구체적 파라미터와 함께 Step으로 구현 가능"
+
+min_total: 2.5
+notes: |
+  - min_total 미만이면 validate.py가 REJECT
+  - 평가자 프롬프트에는 '5점은 드뭅니다. 평균 3.0 기준' 문구 포함 필수
+  - 가중치 합 검증은 evaluator.py 로딩 시 1회 수행 (assert)

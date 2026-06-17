@@ -26,7 +26,7 @@ _rubric = yaml.safe_load(Path("config/rubric.yaml").read_text(encoding="utf-8"))
 LENGTH_MIN = 300
 LENGTH_MAX = 4000
 QUALITY_MIN = _rubric.get("min_total", 2.5)
-BANNED_WORDS = ["무조건", "완벽보장", "절대안전", "반드시성공"]
+BANNED_WORDS = ["무조건", "완벽", "절대", "반드시"]
 
 # ----- 2. 개별 체크 ----
 def check_schema(artifact: dict) -> list[str]:
