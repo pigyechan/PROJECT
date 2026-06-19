@@ -4,6 +4,7 @@
 
 import json
 import os
+import re
 import yaml
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,11 +44,7 @@ def evaluate(artifact_path: Path, verdict_path: Path) -> None:
             system_instruction=EVAL_SYSTEM_PROMPT,
         ),
     )
-    raw = response.text
-
-    # Gemini가 ```json ... ``` 형태로 감싸는 경우 제거
-    import re
-    raw = raw.strip()
+    raw = response.text.strip()
     code_block = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
     if code_block:
         raw = code_block.group(1).strip()

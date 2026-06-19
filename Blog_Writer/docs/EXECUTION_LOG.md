@@ -402,3 +402,20 @@ Iteration 1:
 - 파일 변경 시 연관 파일(실행 파일 포함) 동기화 확인 규칙 및 파일별 연관 관계 표 정의
 - 설정→실행 파일, 설정→문서, 실행 결과→로그 세 방향 커버
 - docs/PIPELINE_GUIDE.md 체크리스트에 연관 파일 동기화 확인 단계 추가
+
+### 2026-06-20 — prompts/gen_system.md, refine_system.md 금지어 지시 추가
+- "다음 단어 사용 금지: 무조건, 완벽, 절대, 반드시" 항목 추가
+- 이유: 이전 실행에서 generator가 '완벽' 사용 → banned 오류로 REJECT
+
+### 2026-06-20 — runs/20260620_013135_a67ea4f5 실행 완료 (엔지니어링 문제 해결 사고 주제)
+- 주제: 엔지니어링 문제 해결 능력 진단 (티켓 예매 시스템 시나리오)
+- 결과: **PASS** (weighted_total=3.95, iteration=1)
+- Critique + Eval 병렬 실행 첫 적용
+
+### 2026-06-20 — Gemini → Claude API 전체 마이그레이션 + 병렬 구조 적용 (롤백)
+- pipeline/steps/generator.py, critique.py, evaluator.py, refine.py: `google.genai` → `anthropic` SDK로 전환
+- 모델 `gemini-3.1-flash-lite` → `claude-opus-4-8` (모든 스텝 공통)
+- 환경변수 `GEMINI_API_KEY` → `ANTHROPIC_API_KEY` (anthropic.Anthropic()가 자동 읽음)
+- pipeline/main.py: Critique + Eval 병렬 실행 적용 (ThreadPoolExecutor, max_workers=2)
+  - 이유: 두 스텝 모두 output.json만 읽으므로 독립적 — Anthropic 블로그 Parallelization 패턴 적용
+- Gemini JSONDecodeError 버그 해소 (Claude는 마크다운 코드블록 감싸기가 일관적)

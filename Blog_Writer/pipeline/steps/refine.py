@@ -46,6 +46,9 @@ def refine(artifact_path: Path, critique_path: Path, verdict_path: Path, refined
 
     output = {
         "brief_hash": artifact["brief_hash"],
+        "title": artifact.get("title", ""),
+        "summary": artifact.get("summary", ""),
+        "keywords": artifact.get("keywords", []),
         "content": result["content"],
         "applied_fixes": result.get("applied_fixes", []),
         "should_iterate": result.get("should_iterate", False),

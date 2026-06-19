@@ -6,6 +6,7 @@
 
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from steps.generator import generate
@@ -40,6 +41,29 @@ def get_paths(run_dir: Path, iteration: int) -> tuple[Path, Path, Path]:
     )
 
 
+def _write_publish_md(output_path: Path, run_dir: Path) -> None:
+    artifact = json.loads(output_path.read_text(encoding="utf-8"))
+    title = artifact.get("title", "").strip()
+    summary = artifact.get("summary", "").strip()
+    keywords = artifact.get("keywords", [])
+    content = artifact.get("content", "").strip()
+
+    lines = []
+    if title:
+        lines.append(f"# {title}\n")
+    if summary:
+        lines.append(f"> {summary}\n")
+    if keywords:
+        lines.append(f"**태그:** {', '.join(f'`{k}`' for k in keywords)}\n")
+    if title or summary or keywords:
+        lines.append("---\n")
+    lines.append(content)
+
+    publish_path = run_dir / "publish.md"
+    publish_path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"발행용 파일 → {publish_path}")
+
+
 def main() -> None:
     if len(sys.argv) >= 2:
         run_dir = Path(sys.argv[1])
@@ -63,15 +87,14 @@ def main() -> None:
     for iteration in range(1, MAX_ITERATIONS + 1):
         output_path, critique_path, verdict_path = get_paths(run_dir, iteration)
 
-        # Step 2: Critique — 새 호출, content만 전달
-        print(f"\n=== [Step 2] Critique: 비평 (iteration {iteration}) ===")
-        critique(output_path, critique_path)
-        print(f"완료: {critique_path}")
-
-        # Step 3: Eval — rubric 기반 채점
-        print(f"=== [Step 3] Eval: 품질 평가 (iteration {iteration}) ===")
-        evaluate(output_path, verdict_path)
-        print(f"완료: {verdict_path}")
+        # Step 2+3: Critique + Eval 병렬 실행 — 둘 다 output만 읽으므로 독립적
+        print(f"\n=== [Step 2+3] Critique + Eval 병렬 실행 (iteration {iteration}) ===")
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            future_critique = executor.submit(critique, output_path, critique_path)
+            future_eval = executor.submit(evaluate, output_path, verdict_path)
+            future_critique.result()
+            future_eval.result()
+        print(f"완료: {critique_path}, {verdict_path}")
 
         # Validate — 코드 기반 이중 검문
         print(f"=== [Step 3-V] Validate: schema/길이/금지어 검증 ===")
@@ -98,6 +121,9 @@ def main() -> None:
             }
             next_path.write_text(json.dumps(next_payload, ensure_ascii=False, indent=2), encoding="utf-8")
             print(f"PASS → {next_path}")
+
+            # 발행용 마크다운 생성
+            _write_publish_md(output_path, run_dir)
             sys.exit(0)
 
         # 마지막 반복이면 Refine 없이 종료
@@ -111,7 +137,7 @@ def main() -> None:
 
         refined_data = json.loads(next_output_path.read_text(encoding="utf-8"))
         print(f"완료: {next_output_path}")
-        print(f"should_iterate: {refined_data['should_iterate']} — {refined_data['iterate_reason']}")
+        print(f"should_iterate: {refined_data['should_iterate']} -- {refined_data['iterate_reason']}")
 
     # 최종 REJECT
     regen_path = run_dir / "99_regen_request.json"

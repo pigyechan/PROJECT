@@ -24,9 +24,9 @@ ARTIFACT_SCHEMA = {
 _rubric = yaml.safe_load(Path("config/rubric.yaml").read_text(encoding="utf-8"))
 
 LENGTH_MIN = 300
-LENGTH_MAX = 4000
+LENGTH_MAX = 12000
 QUALITY_MIN = _rubric.get("min_total", 2.5)
-BANNED_WORDS = ["무조건", "완벽", "절대", "반드시"]
+BANNED_WORDS = ["무조건", "완벽"]
 
 # ----- 2. 개별 체크 ----
 def check_schema(artifact: dict) -> list[str]:

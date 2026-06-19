@@ -32,11 +32,20 @@ def generate(input_path: Path, output_path: Path) -> None:
         content = parsed.get("content", raw)
         if not isinstance(content, str):
             content = json.dumps(content, ensure_ascii=False)
+        title = parsed.get("title", "")
+        summary = parsed.get("summary", "")
+        keywords = parsed.get("keywords", [])
     except json.JSONDecodeError:
         content = raw
+        title = ""
+        summary = ""
+        keywords = []
 
     artifact = {
         "brief_hash": brief_data["brief_hash"],
+        "title": title,
+        "summary": summary,
+        "keywords": keywords,
         "content": content,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "generator_model": "gemini-3.1-flash-lite",
