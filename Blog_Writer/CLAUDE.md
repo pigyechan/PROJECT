@@ -50,6 +50,7 @@ schema 검증 실패 시 저장 금지.
 - feature branch 사용
 - commit 전 사용자 확인
 - PR 생성 후 merge
+- **커밋 전 GitHub 동기화 상태 반드시 확인** (`git status`로 origin 대비 ahead/behind 파악 후 사용자에게 안내)
 
 ---
 
