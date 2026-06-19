@@ -56,6 +56,22 @@ def _last_run_time(project_dir: Path) -> datetime | None:
     return None
 
 
+def _toast(title: str, message: str) -> None:
+    script = (
+        "Add-Type -AssemblyName System.Windows.Forms;"
+        "$n = New-Object System.Windows.Forms.NotifyIcon;"
+        "$n.Icon = [System.Drawing.SystemIcons]::Information;"
+        "$n.Visible = $true;"
+        f"$n.ShowBalloonTip(8000, '{title}', '{message}', [System.Windows.Forms.ToolTipIcon]::Info);"
+        "Start-Sleep -Seconds 9;"
+        "$n.Dispose()"
+    )
+    subprocess.Popen(
+        ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", script],
+        creationflags=0x08000000,  # CREATE_NO_WINDOW
+    )
+
+
 def _prompt_loop() -> None:
     while True:
         time.sleep(PROMPT_CHECK_HOURS * 3600)
@@ -66,13 +82,16 @@ def _prompt_loop() -> None:
                 continue
             last = _last_run_time(project_dir)
             if last is None:
-                print(f"\n[orchestrator] ⏰ {project_name}: 아직 실행 기록이 없습니다.")
+                msg = f"{project_name}: 아직 실행 기록이 없습니다."
+                print(f"\n[orchestrator] ⏰ {msg}")
             elif (now - last).days >= interval_days:
                 elapsed = (now - last).days
-                print(f"\n[orchestrator] ⏰ {project_name}: 마지막 실행 후 {elapsed}일이 지났습니다.")
+                msg = f"{project_name}: 마지막 실행 후 {elapsed}일이 지났습니다."
+                print(f"\n[orchestrator] ⏰ {msg}")
             else:
                 continue
             print(f"[orchestrator]    새 콘텐츠를 만들려면: cd {project_dir} && python pipeline/create_input.py\n")
+            _toast("📝 Pipeline Orchestrator", msg)
 
 
 def run_pipeline(project_name: str, run_dir: Path) -> None:
@@ -89,9 +108,13 @@ def run_pipeline(project_name: str, run_dir: Path) -> None:
     print(f"[orchestrator] ■ {project_name} 완료 ({status}): {run_dir.name}\n")
 
 
+_DEBOUNCE_SECONDS = 10
+
+
 class PipelineHandler(FileSystemEventHandler):
     def __init__(self, project_name: str):
         self.project_name = project_name
+        self._last_triggered: dict[str, float] = {}
 
     def on_created(self, event):
         if event.is_directory:
@@ -103,6 +126,13 @@ class PipelineHandler(FileSystemEventHandler):
 
         run_dir = path.parent
 
+        # watchdog이 동일 파일에 대해 이벤트를 중복 발생시키는 경우 무시
+        key = str(run_dir)
+        now = time.time()
+        if now - self._last_triggered.get(key, 0) < _DEBOUNCE_SECONDS:
+            return
+        self._last_triggered[key] = now
+
         if already_processed(run_dir):
             print(f"[orchestrator] 이미 처리된 run 스킵: {run_dir.name}")
             return
@@ -111,6 +141,14 @@ class PipelineHandler(FileSystemEventHandler):
 
 
 def main() -> None:
+    log_path = BASE_DIR / "orchestrator.log"
+    _log = open(log_path, "a", encoding="utf-8", buffering=1)
+    import sys as _sys
+    _sys.stdout = _log
+    _sys.stderr = _log
+    print(f"\n{'='*50}")
+    print(f"[orchestrator] 시작: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
     observer = Observer()
 
     for project_name, project_dir in PIPELINES.items():

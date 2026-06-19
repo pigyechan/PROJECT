@@ -21,6 +21,7 @@ def generate(input_path: Path, output_path: Path) -> None:
         contents=json.dumps(brief_data["brief"], ensure_ascii=False),
         config=types.GenerateContentConfig(
             system_instruction=GEN_SYSTEM_PROMPT,
+            temperature=0.7,
         ),
     )
     raw = response.text.strip()

@@ -42,6 +42,7 @@ def evaluate(artifact_path: Path, verdict_path: Path) -> None:
         contents=json.dumps(user_message, ensure_ascii=False),
         config=types.GenerateContentConfig(
             system_instruction=EVAL_SYSTEM_PROMPT,
+            temperature=0.2,
         ),
     )
     raw = response.text.strip()

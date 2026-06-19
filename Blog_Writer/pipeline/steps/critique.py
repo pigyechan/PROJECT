@@ -26,6 +26,7 @@ def critique(artifact_path: Path, critique_path: Path) -> None:
         contents=json.dumps(user_message, ensure_ascii=False),
         config=types.GenerateContentConfig(
             system_instruction=CRITIQUE_SYSTEM_PROMPT,
+            temperature=0.2,
         ),
     )
 
