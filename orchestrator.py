@@ -37,7 +37,12 @@ PROMPT_CHECK_HOURS = 6
 
 
 def already_processed(run_dir: Path) -> bool:
-    return (run_dir / "04_next.json").exists() or (run_dir / "99_regen_request.json").exists()
+    # 02_output.json이 이미 있으면 eval_existing.py가 먼저 콘텐츠를 주입한 것 — Generator 재실행 방지
+    return (
+        (run_dir / "04_next.json").exists()
+        or (run_dir / "99_regen_request.json").exists()
+        or (run_dir / "02_output.json").exists()
+    )
 
 
 def _last_run_time(project_dir: Path) -> datetime | None:

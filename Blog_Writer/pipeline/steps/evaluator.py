@@ -54,7 +54,24 @@ def evaluate(artifact_path: Path, verdict_path: Path) -> None:
     if json_match:
         raw = json_match.group(0)
 
-    eval_result = json.loads(raw)
+    try:
+        eval_result = json.loads(raw)
+    except json.JSONDecodeError:
+        # 모델이 간혹 잘못된 JSON을 반환할 때 재시도
+        response2 = client.models.generate_content(
+            model="gemini-3.1-flash-lite",
+            contents=json.dumps(user_message, ensure_ascii=False),
+            config=types.GenerateContentConfig(
+                system_instruction=EVAL_SYSTEM_PROMPT,
+                temperature=0.2,
+                response_mime_type="application/json",
+            ),
+        )
+        raw = response2.text.strip()
+        json_match = re.search(r"\{[\s\S]*\}", raw)
+        if json_match:
+            raw = json_match.group(0)
+        eval_result = json.loads(raw)
 
     scores: dict[str, float] = {}
     if "scores" in eval_result and isinstance(eval_result["scores"], dict):

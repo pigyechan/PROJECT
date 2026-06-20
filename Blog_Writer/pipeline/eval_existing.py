@@ -36,20 +36,22 @@ def main() -> None:
     label = sys.argv[2] if len(sys.argv) >= 3 else content_path.stem
     content = content_path.read_text(encoding="utf-8")
 
-    brief_hash = hashlib.sha256(label.encode()).hexdigest()[:16]
+    # 원본 run 폴더의 01_input.json이 있으면 그대로 복사, 없으면 간이 생성
+    source_input = content_path.parent / "01_input.json"
+    if source_input.exists():
+        source_data = json.loads(source_input.read_text(encoding="utf-8"))
+        brief_hash = source_data.get("brief_hash", hashlib.sha256(label.encode()).hexdigest()[:16])
+    else:
+        brief_hash = hashlib.sha256(label.encode()).hexdigest()[:16]
+        source_data = {
+            "brief_hash": brief_hash,
+            "brief": {"label": label, "source_file": str(content_path)},
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+
     run_dir = make_run_dir(label)
 
-    # 01_input.json (메타 기록용)
-    input_data = {
-        "brief_hash": brief_hash,
-        "brief": {"label": label, "source_file": str(content_path)},
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-    (run_dir / "01_input.json").write_text(
-        json.dumps(input_data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    # 02_output.json — Gen 건너뜀, 기존 콘텐츠 직접 주입
+    # 02_output.json 먼저 작성 — 오케스트레이터가 01_input.json 감지 전에 존재해야 Generator 재실행을 막는다
     output_data = {
         "brief_hash": brief_hash,
         "content": content,
@@ -59,6 +61,11 @@ def main() -> None:
     output_path = run_dir / "02_output.json"
     output_path.write_text(
         json.dumps(output_data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    # 01_input.json — 02_output.json 이후에 작성
+    (run_dir / "01_input.json").write_text(
+        json.dumps(source_data, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
     critique_path = run_dir / "02b_critique.json"
