@@ -27,7 +27,7 @@ class TicketServiceTest {
     TicketRepository ticketRepository;
 
     @Mock
-    PaymentApi paymentApi;
+    PaymentGateway paymentGateway;
 
     TicketService service;
 
@@ -35,7 +35,7 @@ class TicketServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new TicketService(userRepository, ticketRepository, paymentApi);
+        service = new TicketService(userRepository, ticketRepository, paymentGateway);
         paymentInfo = new PaymentInfo("1234-5678-0000-0000");
     }
 
@@ -50,7 +50,7 @@ class TicketServiceTest {
             when(userRepository.findById(1L)).thenReturn(new User(1L, "채민"));
             Ticket ticket = new Ticket(100L, 50_000);
             when(ticketRepository.findById(100L)).thenReturn(ticket);
-            when(paymentApi.charge(50_000, paymentInfo)).thenReturn(true);
+            when(paymentGateway.charge(50_000, paymentInfo)).thenReturn(true);
 
             // when
             boolean result = service.reserveTicket(1L, 100L, paymentInfo);
@@ -68,7 +68,7 @@ class TicketServiceTest {
             when(userRepository.findById(1L)).thenReturn(new User(1L, "채민"));
             Ticket ticket = new Ticket(100L, 50_000);
             when(ticketRepository.findById(100L)).thenReturn(ticket);
-            when(paymentApi.charge(50_000, paymentInfo)).thenReturn(true);
+            when(paymentGateway.charge(50_000, paymentInfo)).thenReturn(true);
 
             // when
             service.reserveTicket(1L, 100L, paymentInfo);
@@ -140,7 +140,7 @@ class TicketServiceTest {
                     () -> service.reserveTicket(1L, 100L, paymentInfo));
 
             // then
-            verify(paymentApi, never()).charge(anyInt(), any());
+            verify(paymentGateway, never()).charge(anyInt(), any());
         }
     }
 
@@ -155,7 +155,7 @@ class TicketServiceTest {
             when(userRepository.findById(1L)).thenReturn(new User(1L, "채민"));
             Ticket ticket = new Ticket(100L, 50_000);
             when(ticketRepository.findById(100L)).thenReturn(ticket);
-            when(paymentApi.charge(50_000, paymentInfo)).thenReturn(false);
+            when(paymentGateway.charge(50_000, paymentInfo)).thenReturn(false);
 
             // when & then
             assertThrows(PaymentFailedException.class,
@@ -169,7 +169,7 @@ class TicketServiceTest {
             when(userRepository.findById(1L)).thenReturn(new User(1L, "채민"));
             Ticket ticket = new Ticket(100L, 50_000);
             when(ticketRepository.findById(100L)).thenReturn(ticket);
-            when(paymentApi.charge(50_000, paymentInfo)).thenReturn(false);
+            when(paymentGateway.charge(50_000, paymentInfo)).thenReturn(false);
 
             // when
             assertThrows(PaymentFailedException.class,
