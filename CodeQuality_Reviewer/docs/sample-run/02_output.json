@@ -1,0 +1,49 @@
+{
+  "brief_hash": "44ea91a312b76c9a",
+  "violations": [
+    {
+      "principle": "Anemic Domain",
+      "location": "Ticket",
+      "evidence": "Ticket 클래스에 예약 가능 여부 확인(isReserved) 및 예약 상태 변경(setReserved, setUserId) 로직이 없고, TicketService가 이를 직접 제어함.",
+      "severity": "high"
+    },
+    {
+      "principle": "SRP",
+      "location": "TicketService.reserveTicket",
+      "evidence": "유저 식별, 티켓 예약 상태 검증, 결제 API 호출, 데이터 영속화를 하나의 메서드에서 절차적으로 처리함.",
+      "severity": "medium"
+    },
+    {
+      "principle": "DIP",
+      "location": "TicketService",
+      "evidence": "고수준 정책인 TicketService가 저수준 상세 구현인 PaymentApi 구체 클래스에 직접 의존함.",
+      "severity": "high"
+    }
+  ],
+  "refactor_suggestions": [
+    {
+      "technique": "Move Method",
+      "target": "Ticket.reserve(long userId)",
+      "before_sketch": "TicketService에서 ticket.setReserved(true)와 ticket.setUserId(userId)를 직접 호출",
+      "after_sketch": "Ticket 클래스 내부에 public void reserve(long userId) { this.reserved = true; this.userId = userId; } 메서드 구현",
+      "rationale": "데이터와 데이터를 사용하는 행위를 동일한 객체로 응집시켜 캡슐화를 강화하고, 외부에서 Ticket의 내부 상태를 직접 변경할 때 발생할 수 있는 데이터 불일치를 방지합니다."
+    },
+    {
+      "technique": "Extract Interface",
+      "target": "PaymentService",
+      "before_sketch": "TicketService가 PaymentApi 구체 클래스를 필드로 가짐",
+      "after_sketch": "PaymentService 인터페이스를 정의하고, PaymentApi가 이를 구현하도록 변경하여 TicketService가 인터페이스에 의존하게 함",
+      "rationale": "구체적인 결제 구현체로부터 TicketService를 분리하여 결제 로직 변경 시 TicketService를 수정하지 않아도 되도록 결합도를 낮춥니다."
+    },
+    {
+      "technique": "Extract Method",
+      "target": "TicketService.reserveTicket",
+      "before_sketch": "한 메서드 내에 유저 조회, 티켓 검증, 결제 처리 로직이 나열됨",
+      "after_sketch": "validateUser(), processPayment(), updateTicketStatus() 등으로 로직을 분리",
+      "rationale": "메서드의 각 단계가 수행하는 역할을 명확히 하여 단일 책임 원칙(SRP)을 준수하고, 특정 단계의 변경이 타 로직에 미치는 영향을 최소화합니다."
+    }
+  ],
+  "content": "{\n  \"violations\": [\n    {\n      \"principle\": \"Anemic Domain\",\n      \"location\": \"Ticket\",\n      \"evidence\": \"Ticket 클래스에 예약 가능 여부 확인(isReserved) 및 예약 상태 변경(setReserved, setUserId) 로직이 없고, TicketService가 이를 직접 제어함.\",\n      \"severity\": \"high\"\n    },\n    {\n      \"principle\": \"SRP\",\n      \"location\": \"TicketService.reserveTicket\",\n      \"evidence\": \"유저 식별, 티켓 예약 상태 검증, 결제 API 호출, 데이터 영속화를 하나의 메서드에서 절차적으로 처리함.\",\n      \"severity\": \"medium\"\n    },\n    {\n      \"principle\": \"DIP\",\n      \"location\": \"TicketService\",\n      \"evidence\": \"고수준 정책인 TicketService가 저수준 상세 구현인 PaymentApi 구체 클래스에 직접 의존함.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"refactor_suggestions\": [\n    {\n      \"technique\": \"Move Method\",\n      \"target\": \"Ticket.reserve(long userId)\",\n      \"before_sketch\": \"TicketService에서 ticket.setReserved(true)와 ticket.setUserId(userId)를 직접 호출\",\n      \"after_sketch\": \"Ticket 클래스 내부에 public void reserve(long userId) { this.reserved = true; this.userId = userId; } 메서드 구현\",\n      \"rationale\": \"데이터와 데이터를 사용하는 행위를 동일한 객체로 응집시켜 캡슐화를 강화하고, 외부에서 Ticket의 내부 상태를 직접 변경할 때 발생할 수 있는 데이터 불일치를 방지합니다.\"\n    },\n    {\n      \"technique\": \"Extract Interface\",\n      \"target\": \"PaymentService\",\n      \"before_sketch\": \"TicketService가 PaymentApi 구체 클래스를 필드로 가짐\",\n      \"after_sketch\": \"PaymentService 인터페이스를 정의하고, PaymentApi가 이를 구현하도록 변경하여 TicketService가 인터페이스에 의존하게 함\",\n      \"rationale\": \"구체적인 결제 구현체로부터 TicketService를 분리하여 결제 로직 변경 시 TicketService를 수정하지 않아도 되도록 결합도를 낮춥니다.\"\n    },\n    {\n      \"technique\": \"Extract Method\",\n      \"target\": \"TicketService.reserveTicket\",\n      \"before_sketch\": \"한 메서드 내에 유저 조회, 티켓 검증, 결제 처리 로직이 나열됨\",\n      \"after_sketch\": \"validateUser(), processPayment(), updateTicketStatus() 등으로 로직을 분리\",\n      \"rationale\": \"메서드의 각 단계가 수행하는 역할을 명확히 하여 단일 책임 원칙(SRP)을 준수하고, 특정 단계의 변경이 타 로직에 미치는 영향을 최소화합니다.\"\n    }\n  ]\n}",
+  "generated_at": "2026-07-07T14:55:29.391535+00:00",
+  "generator_model": "gemini-3.1-flash-lite"
+}

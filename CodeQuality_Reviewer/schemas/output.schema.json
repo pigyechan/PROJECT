@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["brief_hash", "violations", "refactor_suggestions", "generated_at"],
+  "properties": {
+    "brief_hash": { "type": "string", "pattern": "^[a-f0-9]{8,}$" },
+    "violations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["principle", "location", "evidence", "severity"],
+        "properties": {
+          "principle": { "type": "string", "minLength": 1 },
+          "location":  { "type": "string", "minLength": 1 },
+          "evidence":  { "type": "string", "minLength": 1 },
+          "severity":  { "type": "string", "enum": ["low", "medium", "high"] }
+        }
+      }
+    },
+    "refactor_suggestions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["technique", "target", "before_sketch", "after_sketch", "rationale"],
+        "properties": {
+          "technique":     { "type": "string", "minLength": 1 },
+          "target":        { "type": "string", "minLength": 1 },
+          "before_sketch": { "type": "string", "minLength": 1 },
+          "after_sketch":  { "type": "string", "minLength": 1 },
+          "rationale":     { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "content":         { "type": "string" },
+    "generated_at":    { "type": "string" },
+    "generator_model": { "type": "string" }
+  }
+}

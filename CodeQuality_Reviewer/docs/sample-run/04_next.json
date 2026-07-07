@@ -1,0 +1,8 @@
+{
+  "brief_hash": "44ea91a312b76c9a",
+  "status": "PASS",
+  "output": "runs\\20260707_235030_5d130fc5\\02_output.json",
+  "critique": "runs\\20260707_235030_5d130fc5\\02b_critique.json",
+  "verdict": "runs\\20260707_235030_5d130fc5\\03_verdict.json",
+  "iterations": 1
+}

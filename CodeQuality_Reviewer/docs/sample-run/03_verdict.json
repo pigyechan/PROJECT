@@ -1,0 +1,29 @@
+{
+  "brief_hash": "44ea91a312b76c9a",
+  "rubric_scores": {
+    "scores": {
+      "diagnostic_accuracy": 5.0,
+      "minimal_change": 4.0,
+      "behavior_preservation": 2.0,
+      "testability_improvement": 4.0
+    },
+    "weights": {
+      "diagnostic_accuracy": 0.3,
+      "minimal_change": 0.25,
+      "behavior_preservation": 0.25,
+      "testability_improvement": 0.2
+    },
+    "weighted_total": 3.8
+  },
+  "reasons": {
+    "diagnostic_accuracy": "Anemic Domain, SRP, DIP 위반 사례를 정확히 식별하고 구체적인 위치와 근거를 제시하였습니다.",
+    "minimal_change": "지적한 문제들을 해결하기 위한 적절한 리팩토링 기법을 선정했으나, 일부 메서드 추출 시 세부 로직의 응집도 조정이 추가로 필요할 수 있습니다.",
+    "behavior_preservation": "리팩토링 과정에서 발생할 수 있는 부작용이나 기존 동작(예외 처리, 트랜잭션 등) 보존을 위한 주의사항이 명시되지 않았습니다.",
+    "testability_improvement": "인터페이스 추출과 로직 분리를 통해 외부 의존성 모킹과 도메인 테스트가 용이해지는 지점이 명확하게 의도되었습니다."
+  },
+  "evaluator_model": "gemini-3.1-flash-lite",
+  "evaluated_at": "2026-07-07T14:55:34.592255+00:00",
+  "verdict": "PASS",
+  "contract_errors": [],
+  "tests_green": true
+}

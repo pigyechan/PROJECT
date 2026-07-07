@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["brief_hash", "rubric_scores", "verdict"],
+  "properties": {
+    "brief_hash": { "type": "string" },
+    "rubric_scores": {
+      "type": "object",
+      "required": ["scores", "weights", "weighted_total"],
+      "properties": {
+        "scores":         { "type": "object" },
+        "weights":        { "type": "object" },
+        "weighted_total": { "type": "number" }
+      }
+    },
+    "contract_errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tests_green": { "type": ["boolean", "null"] },
+    "verdict":         { "type": "string", "enum": ["PASS", "REJECT"] },
+    "evaluator_model": { "type": "string" },
+    "evaluated_at":    { "type": "string" }
+  }
+}
