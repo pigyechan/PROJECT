@@ -39,8 +39,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 설명 부분은 영어 소문자, 단어 구분은 `-` 사용. 예: `feature/user-login` (O), `feature/userLogin` (X)
 
-> [AI 지시] 브랜치를 생성하기 전에 반드시 `"브랜치 이름을 feature/xxx로 하려고 합니다. 괜찮으신가요?"` 형식으로 사용자에게 확인할 것.
-
 ### 순서
 
 ```
