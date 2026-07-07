@@ -77,9 +77,9 @@ runs/{timestamp_uuid}/
 | `schemas/*.json` | `pipeline/steps/validate.py` (schema 검증 로직), schema를 출력하는 각 step 파일 |
 | `prompts/eval_system.md` | `config/rubric.yaml` (축 일치 여부) |
 | `prompts/` 아래 파일 | 해당 프롬프트를 읽는 `pipeline/steps/*.py`, `docs/DESIGN.md` (프롬프트 전략 섹션) |
-| `pipeline/steps/*.py` | `docs/PIPELINE_GUIDE.md` (Python 파일 목록·공통 패턴), `docs/DESIGN.md` |
-| `pipeline/main.py` | `docs/DESIGN.md` (파이프라인 흐름도), `docs/PIPELINE_GUIDE.md` |
-| 파일 추가·이동·삭제 | `README.md` (파일 구조), `docs/PIPELINE_GUIDE.md` (Python 파일 목록), import 경로를 참조하는 모든 `.py` |
+| `pipeline/steps/*.py` | `../PIPELINE_GUIDE.md` (저장소 루트, Python 파일 목록·공통 패턴), `docs/DESIGN.md` |
+| `pipeline/main.py` | `docs/DESIGN.md` (파이프라인 흐름도), `../PIPELINE_GUIDE.md` |
+| 파일 추가·이동·삭제 | `README.md` (파일 구조), `../PIPELINE_GUIDE.md` (Python 파일 목록), import 경로를 참조하는 모든 `.py` |
 | 실행 결과 변경 | `docs/EXECUTION_LOG.md` |
 | `CLAUDE.md` | `docs/EXECUTION_LOG.md` (변경 이력) |
 

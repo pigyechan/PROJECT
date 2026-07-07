@@ -43,8 +43,7 @@ Blog_Writer/
 │   ├── critique_system.md    # Critique 시스템 프롬프트
 │   └── refine_system.md      # Refine 시스템 프롬프트
 ├── docs/
-│   ├── DESIGN.md             # 하네스 설계서
-│   └── PIPELINE_GUIDE.md     # 파이프라인 설계 가이드
+│   └── DESIGN.md             # 하네스 설계서
 ├── schemas/
 │   ├── input.schema.json
 │   ├── output.schema.json
@@ -73,6 +72,6 @@ python pipeline/main.py           # 파이프라인 실행
 ## 문서
 
 - [DESIGN.md](docs/DESIGN.md) — 하네스 설계서
-- [PIPELINE_GUIDE.md](docs/PIPELINE_GUIDE.md) — 파이프라인 설계 가이드
+- [PIPELINE_GUIDE.md](../PIPELINE_GUIDE.md) — 파이프라인 설계 가이드 (저장소 루트, 모든 파이프라인 공용)
 - [EXECUTION_LOG.md](docs/EXECUTION_LOG.md) — 파이프라인 실행 로그
 
