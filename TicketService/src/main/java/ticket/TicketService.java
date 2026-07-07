@@ -31,8 +31,7 @@ public class TicketService {
             throw new PaymentFailedException("결제에 실패했습니다.");
         }
 
-        ticket.setReserved(true);
-        ticket.setUserId(userId);
+        ticket.reserve(userId);
         ticketRepository.save(ticket);
 
         return true;

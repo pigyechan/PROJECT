@@ -1,7 +1,5 @@
 package ticket;
 
-// [원본 상태] Anemic Domain Model — 검증/상태 전이 규칙 없이 getter/setter만 노출.
-// "예약 가능한가"와 "예약 상태로 바꾼다"는 지식은 전부 TicketService 쪽에 있다.
 public class Ticket {
 
     private final long id;
@@ -24,6 +22,16 @@ public class Ticket {
 
     public boolean isReserved() {
         return reserved;
+    }
+
+    // Move Method: TicketService 에 절차적으로 나열되어 있던
+    // "이미 예약됐는지 검증" + "예약 상태로 전환"을 Ticket 으로 이동.
+    public void reserve(long userId) {
+        if (this.reserved) {
+            throw new TicketAlreadyReservedException("이미 예약된 티켓입니다. id=" + this.id);
+        }
+        this.reserved = true;
+        this.userId = userId;
     }
 
     public void setReserved(boolean reserved) {
