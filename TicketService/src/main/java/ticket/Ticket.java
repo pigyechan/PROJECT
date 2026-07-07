@@ -1,5 +1,8 @@
 package ticket;
 
+// Remove Setting Method: setReserved/setUserId 를 제거해 외부에서 상태를
+// 직접 대입할 수 없게 막았다. 상태 변경은 reserve(userId) 하나로만 가능
+// (Tell, Don't Ask) — 예약 규칙을 우회할 방법이 코드상 존재하지 않는다.
 public class Ticket {
 
     private final long id;
@@ -34,15 +37,7 @@ public class Ticket {
         this.userId = userId;
     }
 
-    public void setReserved(boolean reserved) {
-        this.reserved = reserved;
-    }
-
     public long getUserId() {
         return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
     }
 }

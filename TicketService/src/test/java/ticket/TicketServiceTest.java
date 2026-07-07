@@ -118,7 +118,7 @@ class TicketServiceTest {
             // given
             when(userRepository.findById(1L)).thenReturn(new User(1L, "채민"));
             Ticket reservedTicket = new Ticket(100L, 50_000);
-            reservedTicket.setReserved(true);
+            reservedTicket.reserve(999L); // 이미 다른 유저가 예약해 둔 상태를 만든다
             when(ticketRepository.findById(100L)).thenReturn(reservedTicket);
 
             // when & then
@@ -132,7 +132,7 @@ class TicketServiceTest {
             // given
             when(userRepository.findById(1L)).thenReturn(new User(1L, "채민"));
             Ticket reservedTicket = new Ticket(100L, 50_000);
-            reservedTicket.setReserved(true);
+            reservedTicket.reserve(999L); // 이미 다른 유저가 예약해 둔 상태를 만든다
             when(ticketRepository.findById(100L)).thenReturn(reservedTicket);
 
             // when
