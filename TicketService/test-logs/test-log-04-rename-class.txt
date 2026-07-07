@@ -1,0 +1,27 @@
+﻿> Task :compileJava
+> Task :processResources NO-SOURCE
+> Task :classes
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :test
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 예외 — 결제 실패 > 결제가 실패하면 PaymentFailedException 을 던진다 PASSED
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 예외 — 결제 실패 > 결제가 실패하면 티켓 상태는 그대로이고 저장하지 않는다 PASSED
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 예외 — 이미 예약된 티켓 > 이미 예약된 티켓이면 결제를 시도하지 않는다 PASSED
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 예외 — 이미 예약된 티켓 > 이미 예약된 티켓이면 TicketAlreadyReservedException 을 던진다 PASSED
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 예외 — 유저를 찾을 수 없음 > 유저가 없으면 UserNotFoundException 을 던진다 PASSED
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 예외 — 유저를 찾을 수 없음 > 유저가 없으면 티켓 조회조차 하지 않는다 PASSED
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 정상 — 예약 성공 > 예약 성공 시 티켓을 저장소에 저장한다 PASSED
+
+TicketService — 특성화 테스트 (리팩토링 전 동작 고정) > 정상 — 예약 성공 > 유저 존재 + 미예약 티켓 + 결제 성공 시 예약에 성공하고 true 를 반환한다 PASSED
+
+BUILD SUCCESSFUL in 2s
+3 actionable tasks: 2 executed, 1 up-to-date
