@@ -2,7 +2,7 @@ package ticket;
 
 // [원본 상태]
 // SRP 위반: 유저 조회 + 티켓 검증 + 결제 처리 + 영속화가 한 메서드에 절차적으로 나열.
-public class TicketService {
+public class TicketService implements TicketReservationUseCase {
 
     private final UserRepository userRepository;
     private final TicketRepository ticketRepository;
@@ -14,6 +14,7 @@ public class TicketService {
         this.paymentGateway = paymentGateway;
     }
 
+    @Override
     public boolean reserveTicket(long userId, long ticketId, PaymentInfo info) {
         findUserOrThrow(userId);
         Ticket ticket = findAvailableTicketOrThrow(ticketId);
