@@ -1,5 +1,9 @@
 package calculator.acceptance;
 
+import calculator.DefectRateCalculator;
+import calculator.DefectRateRepository;
+import calculator.DefectRateService;
+import calculator.ProductionRecord;
 import io.cucumber.java.en.*;
 
 import static org.junit.jupiter.api.Assertions.*;
