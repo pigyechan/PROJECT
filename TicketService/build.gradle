@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
 }
 
 group = 'com.quality'
@@ -16,14 +18,24 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
-    testImplementation 'org.assertj:assertj-core:3.25.3'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // spring-boot-starter-test 가 junit-jupiter/mockito/assertj 를 호환 버전으로 함께 가져온다.
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+// Docker 이미지에 실행 가능한 jar(bootJar) 하나만 남기기 위해,
+// 실행 불가능한 plain jar(순수 클래스만 담긴 jar)는 만들지 않는다.
+tasks.named('jar') {
+    enabled = false
 }
 
 test {
