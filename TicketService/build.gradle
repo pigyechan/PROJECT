@@ -26,6 +26,17 @@ dependencies {
     // spring-boot-starter-test 가 junit-jupiter/mockito/assertj 를 호환 버전으로 함께 가져온다.
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Cucumber-JVM: Feature 파일(Gherkin)을 실제로 실행하는 인수테스트 엔진
+    testImplementation 'io.cucumber:cucumber-java:7.18.0'
+    testImplementation 'io.cucumber:cucumber-spring:7.18.0'
+    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.18.0'
+    testImplementation 'org.junit.platform:junit-platform-suite:1.10.2'
+
+    // Testcontainers: 인수테스트 실행 중 실제 Postgres 컨테이너를 띄워서 검증
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
 }
 
 tasks.withType(JavaCompile).configureEach {
