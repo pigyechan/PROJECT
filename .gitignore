@@ -5,3 +5,4 @@ orchestrator.log
 orch_*.txt
 Study_Notes/
 .claude/settings.local.json
+automation/
