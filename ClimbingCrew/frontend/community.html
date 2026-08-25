@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커뮤니티 | ClimbingCrew</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <a class="brand" href="index.html"><span class="dot"></span>ClimbingCrew</a>
+  <nav class="app-nav">
+    <a href="profile.html">내프로필</a>
+    <a href="index.html">크루</a>
+    <a href="community.html" class="active">커뮤니티</a>
+  </nav>
+</header>
+<div class="mock-banner">가짜 데이터로 만든 화면입니다. 글쓰기/댓글은 새로고침하면 초기화됩니다.</div>
+
+<main style="max-width:1040px;">
+  <div class="calendar-header-row">
+    <div>
+      <h1 class="page-title" style="margin:0;">커뮤니티</h1>
+      <p class="page-subtitle" style="margin-top:6px;">크루와 무관하게, 서비스를 쓰는 모든 사람이 함께 보는 공간이에요.</p>
+    </div>
+    <button class="add-event-btn" id="write-post-btn">+ 글쓰기</button>
+  </div>
+
+  <div class="board-tabs" id="board-tabs">
+    <button data-board="all">전체</button>
+    <button data-board="free" class="active">자유게시판</button>
+    <button data-board="trade">장비거래</button>
+    <button data-board="events">대회 & 이벤트</button>
+    <button data-board="gyms">암장 공유</button>
+    <button data-board="mine">내가 쓴 글</button>
+  </div>
+
+  <form id="post-search-form" style="display:flex;gap:8px;margin-bottom:18px;">
+    <input type="text" id="post-search-input" placeholder="제목 또는 내용으로 검색" style="border:1px solid var(--color-border);border-radius:999px;padding:9px 16px;font-family:inherit;font-size:0.9rem;width:100%;max-width:320px;">
+    <button type="submit" class="add-event-btn">검색</button>
+  </form>
+
+  <div class="board-layout">
+    <div class="board-list-col" id="board-list"></div>
+    <div class="board-detail-col">
+      <div class="card board-detail" id="board-detail">
+        <div class="calendar-header-row" style="align-items:flex-start;">
+          <div>
+            <h3 id="detail-title" style="margin:0 0 6px;"></h3>
+            <p class="board-detail-meta" id="detail-meta" style="margin:0;"></p>
+          </div>
+          <div class="item-actions" id="post-owner-actions" style="display:none;margin-top:0;">
+            <button type="button" id="post-edit-btn">수정</button>
+            <button type="button" id="post-delete-btn">삭제</button>
+          </div>
+        </div>
+        <div class="board-detail-content" id="detail-content" style="margin-top:14px;"></div>
+
+        <div class="comment-section">
+          <div class="comment-heading" id="comment-count"></div>
+          <div id="comment-list"></div>
+          <form class="comment-form" id="comment-form">
+            <input type="text" id="comment-input" placeholder="댓글을 남겨보세요" required>
+            <button type="submit">등록</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 글쓰기 모달 -->
+<div class="modal-overlay" id="write-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="write-modal-close">✕</button>
+    <h3 style="margin-top:0;">새 글 쓰기</h3>
+    <form class="event-form" id="write-form">
+      <label>게시판
+        <select id="write-board-select">
+          <option value="free">자유게시판</option>
+          <option value="trade">장비거래</option>
+          <option value="events">대회 & 이벤트</option>
+          <option value="gyms">암장 공유</option>
+        </select>
+      </label>
+      <label>제목
+        <input type="text" id="write-title-input" required maxlength="80">
+      </label>
+      <label>내용 (최대 500자)
+        <textarea id="write-content-input" maxlength="500" rows="5" required style="border:1px solid var(--color-border);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
+      </label>
+      <button type="submit" class="event-form-submit">등록</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script>
+  const boardLabel = { free: "자유게시판", trade: "장비거래", events: "대회 & 이벤트", gyms: "암장 공유" };
+  let activeBoard = "free";
+  let selectedIndex = 0;
+
+  const tabButtons = document.querySelectorAll("#board-tabs button");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeBoard = btn.dataset.board;
+      selectedIndex = 0;
+      render();
+    });
+  });
+
+  let searchQuery = "";
+
+  function sortedPosts() {
+    let list;
+    if (activeBoard === "mine" || activeBoard === "all") {
+      const collected = [];
+      Object.keys(MOCK_COMMUNITY_POSTS).forEach(board => {
+        MOCK_COMMUNITY_POSTS[board].forEach((p, i) => {
+          if (activeBoard === "all" || p.author === MOCK_ME.name) {
+            collected.push({ ...p, _i: i, _board: board });
+          }
+        });
+      });
+      list = collected.sort((a, b) => b.date.localeCompare(a.date));
+    } else {
+      list = (MOCK_COMMUNITY_POSTS[activeBoard] || [])
+        .map((p, i) => ({ ...p, _i: i, _board: activeBoard }))
+        .sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    if (searchQuery) {
+      list = list.filter(p => p.title.includes(searchQuery) || p.content.includes(searchQuery));
+    }
+    return list;
+  }
+
+  function metaBadge(post) {
+    const board = post._board;
+    if (board === "trade" && post.status) return `<span class="board-meta-badge">${post.status}</span>`;
+    if (board === "events" && post.eventDate) return `<span class="board-meta-badge">${post.eventDate}</span>`;
+    if (board === "gyms" && post.gymName && post.gymName !== "-") return `<span class="board-meta-badge">${post.gymName}</span>`;
+    return "";
+  }
+
+  function detailMeta(post) {
+    const board = post._board;
+    const parts = [post.author, post.date];
+    if (activeBoard === "mine" || activeBoard === "all") parts.unshift(boardLabel[board]);
+    if (board === "trade" && post.price) parts.push(post.price, post.status);
+    if (board === "events" && post.eventDate) parts.push(`일시: ${post.eventDate}`);
+    if (board === "gyms" && post.gymName && post.gymName !== "-") parts.push(post.gymName);
+    return parts.join(" · ");
+  }
+
+  function render() {
+    const posts = sortedPosts();
+    const listEl = document.getElementById("board-list");
+
+    if (posts.length === 0) {
+      listEl.innerHTML = `<p class="page-subtitle">${searchQuery ? "검색 결과가 없어요." : (activeBoard === "mine" ? "아직 내가 쓴 글이 없어요." : "아직 글이 없어요.")}</p>`;
+      document.getElementById("board-detail").style.visibility = "hidden";
+      return;
+    }
+
+    document.getElementById("board-detail").style.visibility = "visible";
+    if (selectedIndex >= posts.length) selectedIndex = 0;
+
+    listEl.innerHTML = posts.map((p, sortedI) => `
+      <div class="card board-row-compact${sortedI === selectedIndex ? " selected" : ""}" data-sorted-index="${sortedI}">
+        <span class="board-row-title">${p.title}</span>
+        <div class="board-row-sub">${(activeBoard === "mine" || activeBoard === "all") ? boardLabel[p._board] + " · " : ""}${p.author} · ${p.date}</div>
+      </div>
+    `).join("");
+
+    listEl.querySelectorAll(".board-row-compact").forEach(row => {
+      row.addEventListener("click", () => {
+        selectedIndex = Number(row.dataset.sortedIndex);
+        render();
+      });
+    });
+
+    renderDetail(posts[selectedIndex]);
+  }
+
+  function renderDetail(post) {
+    document.getElementById("detail-title").textContent = post.title;
+    document.getElementById("detail-meta").textContent = detailMeta(post);
+    document.getElementById("detail-content").textContent = post.content;
+
+    const isMine = post.author === MOCK_ME.name;
+    document.getElementById("post-owner-actions").style.display = isMine ? "flex" : "none";
+    if (isMine) {
+      document.getElementById("post-edit-btn").onclick = () => editPost(post);
+      document.getElementById("post-delete-btn").onclick = () => deletePost(post);
+    }
+
+    const comments = post.comments || [];
+    document.getElementById("comment-count").textContent = `댓글 ${comments.length}개`;
+    document.getElementById("comment-list").innerHTML = comments.map((c, ci) => `
+      <div class="comment-item">
+        <div class="comment-head">
+          <span class="comment-author">${c.author}</span><span>${c.date}</span>
+          ${(c.author === MOCK_ME.name || post.author === MOCK_ME.name) ? `
+            <span class="comment-actions">
+              <button type="button" class="comment-edit-btn" data-comment-index="${ci}">수정</button>
+              <button type="button" class="comment-delete-btn" data-comment-index="${ci}">삭제</button>
+            </span>
+          ` : ""}
+        </div>
+        <div>${c.content}</div>
+      </div>
+    `).join("");
+
+    document.querySelectorAll(".comment-edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const comment = comments[Number(btn.dataset.commentIndex)];
+        const next = prompt("댓글 수정", comment.content);
+        if (next !== null && next.trim()) {
+          comment.content = next.trim();
+          renderDetail(post);
+        }
+      });
+    });
+
+    document.querySelectorAll(".comment-delete-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!confirm("댓글을 삭제할까요?")) return;
+        comments.splice(Number(btn.dataset.commentIndex), 1);
+        renderDetail(post);
+      });
+    });
+  }
+
+  function editPost(post) {
+    const original = MOCK_COMMUNITY_POSTS[post._board][post._i];
+    const newTitle = prompt("제목 수정", original.title);
+    if (newTitle === null || !newTitle.trim()) return;
+    const newContent = prompt("내용 수정 (최대 500자)", original.content);
+    if (newContent === null || !newContent.trim()) return;
+    if (newContent.trim().length > 500) { alert("500자 이내로 작성해주세요."); return; }
+
+    original.title = newTitle.trim();
+    original.content = newContent.trim();
+    render();
+  }
+
+  function deletePost(post) {
+    if (!confirm("이 글을 삭제할까요? (댓글도 함께 삭제됩니다)")) return;
+    MOCK_COMMUNITY_POSTS[post._board].splice(post._i, 1);
+    selectedIndex = 0;
+    render();
+  }
+
+  document.getElementById("comment-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("comment-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const posts = sortedPosts();
+    const original = MOCK_COMMUNITY_POSTS[posts[selectedIndex]._board][posts[selectedIndex]._i];
+    if (!original.comments) original.comments = [];
+    original.comments.push({ author: MOCK_ME.name, date: todayStr(), content: text });
+
+    input.value = "";
+    render();
+  });
+
+  // --- 글쓰기 --------------------------------------------------------------
+
+  const writeModal = document.getElementById("write-modal");
+  document.getElementById("write-post-btn").addEventListener("click", () => writeModal.classList.add("open"));
+  document.getElementById("write-modal-close").addEventListener("click", () => writeModal.classList.remove("open"));
+  writeModal.addEventListener("click", (e) => { if (e.target === writeModal) writeModal.classList.remove("open"); });
+
+  document.getElementById("write-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const board = document.getElementById("write-board-select").value;
+    const title = document.getElementById("write-title-input").value.trim();
+    const content = document.getElementById("write-content-input").value.trim();
+    if (!title || !content) return;
+    if (content.length > 500) { alert("500자 이내로 작성해주세요."); return; }
+
+    MOCK_COMMUNITY_POSTS[board].unshift({
+      title,
+      author: MOCK_ME.name,
+      date: todayStr(),
+      content,
+      comments: [],
+    });
+
+    e.target.reset();
+    writeModal.classList.remove("open");
+
+    tabButtons.forEach(b => b.classList.remove("active"));
+    document.querySelector(`#board-tabs button[data-board="${board}"]`).classList.add("active");
+    activeBoard = board;
+    selectedIndex = 0;
+    render();
+  });
+
+  document.getElementById("post-search-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    searchQuery = document.getElementById("post-search-input").value.trim();
+    selectedIndex = 0;
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

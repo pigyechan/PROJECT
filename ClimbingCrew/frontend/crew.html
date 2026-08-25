@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>크루 화면 | ClimbingCrew</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.21/index.global.min.js"></script>
+</head>
+<body>
+
+<header class="app-header">
+  <a class="brand" href="index.html"><span class="dot"></span>ClimbingCrew</a>
+  <nav class="app-nav">
+    <a href="profile.html">내프로필</a>
+    <a href="index.html" class="active">크루</a>
+    <a href="community.html">커뮤니티</a>
+  </nav>
+</header>
+<div class="mock-banner">가짜 데이터로 만든 화면입니다. 지도는 네이버 지도 API 연동 전 자리만 잡아둔 상태예요.</div>
+
+<main style="max-width:1040px;">
+  <a class="back-link" href="index.html">
+    <svg class="back-link-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    내 크루 목록
+  </a>
+  <div class="crew-page-header">
+    <span class="crew-emoji-big" id="crew-emoji"></span>
+    <div>
+      <h1 class="page-title" id="crew-name" style="margin:0;"></h1>
+      <span class="role-badge" id="crew-role-badge"></span>
+    </div>
+  </div>
+
+  <div class="crew-layout">
+    <nav class="crew-sidebar" id="crew-sidebar">
+      <button data-view="map" class="active">🗺️ 지도</button>
+      <button data-view="calendar">📅 일정</button>
+      <button data-view="community">📋 크루 소식</button>
+      <button data-view="info">ℹ️ 크루 정보</button>
+    </nav>
+
+    <div class="crew-content">
+
+      <!-- 지도 화면 (기본) -->
+      <section class="crew-view active" id="view-map">
+        <h2 class="section-heading" style="margin-top:0;">최근 1주일 크루 활동</h2>
+        <p class="page-subtitle" style="margin-top:-8px;">크루원들이 최근 7일 사이 다녀온 암장이에요. <strong>핀을 클릭</strong>하면 그때 남긴 평을 볼 수 있어요. 같은 핀을 다시 누르면 닫혀요.</p>
+
+        <div class="map-placeholder card" id="map-placeholder">
+          <span class="map-label">지도 자리 (네이버 지도 API 연동 예정)</span>
+        </div>
+        <div class="card review-panel" id="review-panel">
+          <h3 id="review-gym-name"></h3>
+          <p class="review-sub" id="review-gym-sub"></p>
+          <div id="review-items"></div>
+        </div>
+      </section>
+
+      <!-- 일정 화면 -->
+      <section class="crew-view" id="view-calendar">
+        <div class="calendar-header-row">
+          <h2 class="section-heading" style="margin-top:0;">모임 캘린더</h2>
+          <button class="add-event-btn" id="add-event-btn" style="display:none;">+ 일정 등록</button>
+        </div>
+        <div class="card calendar-card">
+          <div id="fc-container"></div>
+        </div>
+      </section>
+
+      <!-- 크루 소식 (크루원 전용 게시판) -->
+      <section class="crew-view" id="view-community">
+        <h2 class="section-heading" style="margin-top:0;">크루 소식</h2>
+        <p class="page-subtitle" style="margin-top:-8px;">이 크루원들끼리만 보는 공간이에요. 사이트 전체 커뮤니티는 상단 메뉴에 따로 있어요.</p>
+
+        <div class="community-tabs">
+          <button data-tab="all" class="active">전체 글</button>
+          <button data-tab="mine">내가 쓴 글</button>
+        </div>
+
+        <form class="card post-form" id="post-form">
+          <textarea id="post-input" placeholder="크루원들에게 하고 싶은 말을 남겨보세요"></textarea>
+          <div class="post-submit-row">
+            <button type="submit">등록</button>
+          </div>
+        </form>
+
+        <div id="post-list"></div>
+      </section>
+
+      <!-- 크루 정보 -->
+      <section class="crew-view" id="view-info">
+        <h2 class="section-heading" style="margin-top:0;">크루 정보</h2>
+
+        <div class="card info-summary-row">
+          <div class="info-summary-item">
+            <div class="info-summary-value" id="info-member-count"></div>
+            <div class="info-summary-label">총 크루원</div>
+          </div>
+          <div class="info-summary-item">
+            <div class="info-summary-value" id="info-created-date"></div>
+            <div class="info-summary-label">생성일자</div>
+          </div>
+        </div>
+
+        <h3 class="section-heading" style="font-size:0.95rem;">크루원 목록</h3>
+        <p class="page-subtitle" style="margin-top:-8px;font-size:0.82rem;">내 이름을 누르면 정보를 수정할 수 있어요.</p>
+        <div id="member-list"></div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<!-- 크루원 개인 정보 모달 -->
+<div class="modal-overlay" id="member-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="member-modal-close">✕</button>
+
+    <!-- 읽기 전용 화면 -->
+    <div id="member-view-mode">
+      <div class="member-modal-header">
+        <span class="profile-avatar" id="member-modal-photo" style="width:44px;height:44px;font-size:1.3rem;">🙂</span>
+        <div>
+          <span style="display:flex;align-items:center;gap:8px;">
+            <h3 id="member-modal-name" style="margin:0;"></h3>
+            <span class="role-badge" id="member-modal-role"></span>
+          </span>
+          <p class="page-subtitle" id="member-modal-meta" style="margin:2px 0 0;font-size:0.82rem;"></p>
+        </div>
+      </div>
+      <p id="member-modal-bio"></p>
+      <div class="item-actions" id="member-modal-edit-row" style="display:none;">
+        <button type="button" id="member-modal-leave-btn" class="danger">크루 탈퇴</button>
+        <button type="button" id="member-modal-edit-btn">내 정보 수정</button>
+      </div>
+    </div>
+
+    <!-- 수정 화면 (소개글만 — 프로필 사진은 내프로필에서 등록) -->
+    <div id="member-edit-mode" style="display:none;">
+      <h3 style="margin-top:0;">내 정보 수정</h3>
+      <p class="page-subtitle" style="margin-top:-8px;">프로필 사진은 <a href="profile.html">내프로필</a>에서 등록한 사진이 그대로 표시돼요.</p>
+      <form class="event-form" id="member-edit-form">
+        <label>소개 글 (최대 200자)
+          <textarea id="member-bio-input" maxlength="200" rows="3" style="border:1px solid var(--color-border);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
+        </label>
+        <div class="post-submit-row" style="justify-content:flex-end;gap:8px;">
+          <button type="button" id="member-edit-cancel-btn" style="background:transparent;border:1px solid var(--color-border);padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer;">취소</button>
+          <button type="submit" class="event-form-submit">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 참석자 모달 -->
+<div class="modal-overlay" id="attendee-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="attendee-modal-close">✕</button>
+    <div class="attendee-title" id="attendee-title" style="font-weight:700;margin-bottom:10px;"></div>
+
+    <div class="rsvp-row" id="rsvp-row">
+      <button class="rsvp-btn going" data-status="going" id="rsvp-going">참석해요</button>
+      <button class="rsvp-btn not-going" data-status="notGoing" id="rsvp-not-going">불참이에요</button>
+    </div>
+
+    <div class="comment-heading" style="margin-top:16px;">참석 크루원</div>
+    <div id="attendee-chips"></div>
+    <p class="page-subtitle" id="attendee-note" style="margin-top:10px;margin-bottom:0;"></p>
+
+    <div class="item-actions" id="event-owner-actions" style="display:none;">
+      <button type="button" id="event-edit-title-btn">제목 수정</button>
+      <button type="button" id="event-delete-btn">일정 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 일정 등록 모달 -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="event-modal-close">✕</button>
+    <h3 style="margin-top:0;">새 일정 등록</h3>
+    <form class="event-form" id="event-form">
+      <label>제목
+        <input type="text" id="event-title-input" placeholder="예: 주말 정기 등반" required>
+      </label>
+      <label>날짜
+        <input type="date" id="event-date-input" required>
+      </label>
+      <button type="submit" class="event-form-submit">등록</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const crewId = Number(params.get("id")) || MOCK_CREWS[0].id;
+  const crew = MOCK_CREWS.find(c => c.id === crewId) || MOCK_CREWS[0];
+
+  const roleLabel = { OWNER: "OWNER", MANAGER: "MANAGER", MEMBER: "MEMBER" };
+  const roleClass = { OWNER: "role-owner", MANAGER: "role-manager", MEMBER: "role-member" };
+
+  document.title = `${crew.name} | ClimbingCrew`;
+  document.getElementById("crew-emoji").textContent = crew.emoji;
+  document.getElementById("crew-name").textContent = crew.name;
+  document.getElementById("crew-role-badge").textContent = roleLabel[crew.role];
+  document.getElementById("crew-role-badge").className = `role-badge ${roleClass[crew.role]}`;
+
+  // --- 크루 정보 ---------------------------------------------------------
+
+  document.getElementById("info-member-count").textContent = `${crew.memberCount}명`;
+  document.getElementById("info-created-date").textContent = `${crew.createdYear}년 ${crew.createdMonth}월`;
+
+  const memberInfo = MOCK_CREW_MEMBER_INFO[crewId] || [];
+  const memberListEl = document.getElementById("member-list");
+  const memberModal = document.getElementById("member-modal");
+
+  function renderMemberList() {
+    // 내 이름이 항상 맨 위에 오도록 표시 순서만 바꾼다 (data-index는 원래 배열 인덱스 그대로 유지)
+    const myIndex = memberInfo.findIndex(m => m.name === MOCK_ME.name);
+    const order = myIndex > -1
+      ? [myIndex, ...memberInfo.map((_, i) => i).filter(i => i !== myIndex)]
+      : memberInfo.map((_, i) => i);
+
+    memberListEl.innerHTML = order.map(i => {
+      const m = memberInfo[i];
+      const isMe = m.name === MOCK_ME.name;
+      const photo = isMe ? MOCK_ME.photo : null;
+      const photoHtml = photo ? `<img src="${photo}" alt="프로필 사진" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : "🙂";
+      return `
+      <div class="card member-row" data-index="${i}">
+        <span style="display:flex;align-items:center;gap:12px;">
+          <span class="profile-avatar" style="width:40px;height:40px;font-size:1.1rem;cursor:default;">${photoHtml}</span>
+          <span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <span class="member-row-name">${m.name}${isMe ? " (나)" : ""}</span>
+              <span class="role-badge ${roleClass[m.role]}">${roleLabel[m.role]}</span>
+            </span>
+            <div class="page-subtitle" style="margin:2px 0 0;font-size:0.82rem;">${m.joinedDate} 가입</div>
+          </span>
+        </span>
+      </div>
+    `;
+    }).join("");
+
+    const restCount = crew.memberCount - memberInfo.length;
+    if (restCount > 0) {
+      const note = document.createElement("div");
+      note.className = "member-more-note";
+      note.textContent = `외 ${restCount}명 (프로필 정보 없음)`;
+      memberListEl.appendChild(note);
+    }
+
+    memberListEl.querySelectorAll(".member-row").forEach(row => {
+      row.addEventListener("click", () => openMemberModal(memberInfo[Number(row.dataset.index)]));
+    });
+  }
+
+  function openMemberModal(m) {
+    document.getElementById("member-view-mode").style.display = "block";
+    document.getElementById("member-edit-mode").style.display = "none";
+
+    document.getElementById("member-modal-name").textContent = m.name;
+    document.getElementById("member-modal-role").textContent = roleLabel[m.role];
+    document.getElementById("member-modal-role").className = `role-badge ${roleClass[m.role]}`;
+    document.getElementById("member-modal-meta").textContent = `${m.joinedDate} 가입`;
+    document.getElementById("member-modal-bio").textContent = m.bio || "소개글이 없습니다.";
+
+    const isMe = m.name === MOCK_ME.name;
+    const photo = isMe ? MOCK_ME.photo : null; // 사진은 각자 내프로필에서 등록한 것 — 다른 사람 건 mock에 없음
+    document.getElementById("member-modal-photo").innerHTML = photo
+      ? `<img src="${photo}" alt="프로필 사진" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+      : "🙂";
+
+    document.getElementById("member-modal-edit-row").style.display = isMe ? "flex" : "none";
+    if (isMe) {
+      document.getElementById("member-modal-edit-btn").onclick = () => openMemberEditForm(m);
+      document.getElementById("member-modal-leave-btn").onclick = () => leaveCrew(m);
+    }
+    memberModal.classList.add("open");
+  }
+
+  // 크루 탈퇴 규칙(CLAUDE.md 참고): OWNER는 넘긴 뒤에야 탈퇴 가능, 단 혼자뿐이면 크루 삭제 가능.
+  function leaveCrew(m) {
+    if (m.role === "OWNER" && crew.memberCount > 1) {
+      alert("OWNER는 다른 크루원에게 OWNER를 넘긴 뒤에야 탈퇴할 수 있어요.");
+      return;
+    }
+
+    const isLastOwner = m.role === "OWNER" && crew.memberCount <= 1;
+    const message = isLastOwner
+      ? "혼자 남은 크루예요. 탈퇴하면 크루 자체가 삭제됩니다. 계속할까요?"
+      : "정말 이 크루를 탈퇴할까요?";
+    if (!confirm(message)) return;
+
+    const crewIdx = MOCK_CREWS.findIndex(c => c.id === crewId);
+    if (crewIdx > -1) MOCK_CREWS.splice(crewIdx, 1);
+
+    alert(isLastOwner ? "크루가 삭제되었습니다." : "크루에서 탈퇴했습니다.");
+    location.href = "index.html";
+  }
+
+  function openMemberEditForm(m) {
+    document.getElementById("member-view-mode").style.display = "none";
+    document.getElementById("member-edit-mode").style.display = "block";
+    document.getElementById("member-bio-input").value = m.bio || "";
+  }
+
+  document.getElementById("member-edit-cancel-btn").addEventListener("click", () => {
+    document.getElementById("member-view-mode").style.display = "block";
+    document.getElementById("member-edit-mode").style.display = "none";
+  });
+
+  document.getElementById("member-edit-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const me = memberInfo.find(m => m.name === MOCK_ME.name);
+    if (!me) return;
+
+    const newBio = document.getElementById("member-bio-input").value.trim();
+    if (newBio.length > 200) { alert("200자 이내로 작성해주세요."); return; }
+
+    me.bio = newBio;
+    openMemberModal(me);
+  });
+
+  renderMemberList();
+
+  document.getElementById("member-modal-close").addEventListener("click", () => memberModal.classList.remove("open"));
+  memberModal.addEventListener("click", (e) => { if (e.target === memberModal) memberModal.classList.remove("open"); });
+
+  // --- 사이드바 전환 --------------------------------------------------------
+
+  const sidebarButtons = document.querySelectorAll("#crew-sidebar button");
+  const views = document.querySelectorAll(".crew-view");
+
+  sidebarButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      sidebarButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      views.forEach(v => v.classList.remove("active"));
+      document.getElementById("view-" + btn.dataset.view).classList.add("active");
+
+      if (btn.dataset.view === "calendar") {
+        fcCalendar.updateSize(); // 숨겨져 있던 탭에서 막 보이는 시점이라 크기 재계산 필요
+      }
+    });
+  });
+
+  // --- 지도: 최근 1주일 크루 활동 (핀 토글) ----------------------------------
+
+  const activity = getRecentCrewGymActivity(crewId);
+  const visLabel = { PUBLIC: "전체공개", CREW_ONLY: "크루공개", PRIVATE: "비공개" };
+
+  const mapEl = document.getElementById("map-placeholder");
+  let openGymId = null;
+
+  if (activity.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "page-subtitle";
+    empty.style.cssText = "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;";
+    empty.textContent = "최근 1주일 사이 기록된 방문이 없어요.";
+    mapEl.appendChild(empty);
+  }
+
+  activity.forEach(({ gym, reviews }) => {
+    const pin = document.createElement("div");
+    pin.className = "pin";
+    pin.style.left = gym.x;
+    pin.style.top = gym.y;
+    pin.onclick = () => toggleReviews(gym.id);
+    pin.innerHTML = `
+      <span class="pin-icon">📍</span>
+      <span class="pin-label">${gym.name} · <span class="pin-count">${reviews.length}</span></span>
+    `;
+    mapEl.appendChild(pin);
+  });
+
+  function toggleReviews(gymId) {
+    const panel = document.getElementById("review-panel");
+
+    if (openGymId === gymId) {
+      // 같은 핀을 다시 클릭 → 닫기
+      panel.classList.remove("open");
+      openGymId = null;
+      return;
+    }
+
+    const found = activity.find(a => a.gym.id === gymId);
+    if (!found) return;
+
+    document.getElementById("review-gym-name").textContent = found.gym.name;
+    document.getElementById("review-gym-sub").textContent = `${found.gym.address} · 최근 1주일 평 ${found.reviews.length}개`;
+
+    document.getElementById("review-items").innerHTML = `<div class="review-card-row">` + found.reviews.map(r => `
+      <div class="review-card">
+        <div class="review-card-photo">${r.photo}</div>
+        <div class="review-card-top">
+          <span class="review-card-author">${r.author}</span>
+          <span class="visibility-tag">${visLabel[r.visibility]}</span>
+        </div>
+        <div class="review-card-stars">${starString(r.rating)}</div>
+        <div class="review-card-date">${r.date}</div>
+        <div class="review-card-memo">${r.content}</div>
+      </div>
+    `).join("") + `</div>`;
+
+    panel.classList.add("open");
+    openGymId = gymId;
+  }
+
+  // --- 일정: 모임 캘린더 (이 크루 이벤트만, 크루 생성 달 ~ 현재로부터 2년 후까지 탐색) ---
+  // FullCalendar 사용 (docs/decisions 참고: 직접 만든 그리드 대신 외부 라이브러리로 교체)
+
+  const crewEvents = MOCK_EVENTS.filter(ev => ev.crew === crew.name).slice();
+
+  const minYM = crew.createdYear * 12 + (crew.createdMonth - 1);
+  const maxYM = TODAY.getFullYear() * 12 + TODAY.getMonth() + 24;
+  const minYMDate = new Date(Math.floor(minYM / 12), minYM % 12, 1);
+  const maxYMDate = new Date(Math.floor(maxYM / 12), (maxYM % 12) + 1, 1); // FullCalendar validRange.end는 배타적(포함 안 함)
+  const fmtDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  document.getElementById("event-date-input").min = fmtDate(minYMDate);
+  document.getElementById("event-date-input").max = fmtDate(new Date(maxYMDate - 86400000));
+
+  const canCreateEvent = crew.role === "OWNER" || crew.role === "MANAGER";
+  if (canCreateEvent) {
+    document.getElementById("add-event-btn").style.display = "inline-block";
+  }
+
+  const fcCalendar = new FullCalendar.Calendar(document.getElementById("fc-container"), {
+    initialView: "dayGridMonth",
+    locale: "ko",
+    initialDate: fmtDate(TODAY),
+    validRange: { start: fmtDate(minYMDate), end: fmtDate(maxYMDate) },
+    headerToolbar: { left: "prev,next", center: "title", right: "" },
+    height: "auto",
+    fixedWeekCount: false,
+    events: crewEvents.map(ev => ({ title: ev.title, start: ev.date, extendedProps: { crew: ev.crew, author: ev.author || null } })),
+    eventClick: (info) => showAttendees(info.event),
+  });
+  fcCalendar.render();
+
+  // --- 참석자 모달 --------------------------------------------------------
+
+  const attendeeModal = document.getElementById("attendee-modal");
+  let currentEventKey = null;
+  let currentFcEvent = null;
+
+  function showAttendees(fcEvent) {
+    currentFcEvent = fcEvent;
+    currentEventKey = `${fcEvent.startStr}|${fcEvent.title}`;
+    document.getElementById("attendee-title").textContent = `${fcEvent.title} (${fcEvent.startStr})`;
+
+    const isMine = fcEvent.extendedProps.author === MOCK_ME.name;
+    document.getElementById("event-owner-actions").style.display = isMine ? "flex" : "none";
+
+    renderAttendeeModal();
+    attendeeModal.classList.add("open");
+  }
+
+  document.getElementById("event-edit-title-btn").addEventListener("click", () => {
+    if (!currentFcEvent) return;
+    const newTitle = prompt("일정 제목 수정", currentFcEvent.title);
+    if (newTitle === null || !newTitle.trim()) return;
+
+    const oldKey = currentEventKey;
+    currentFcEvent.setProp("title", newTitle.trim());
+    const newKey = `${currentFcEvent.startStr}|${currentFcEvent.title}`;
+    if (MOCK_ATTENDEES[oldKey]) {
+      MOCK_ATTENDEES[newKey] = MOCK_ATTENDEES[oldKey];
+      if (newKey !== oldKey) delete MOCK_ATTENDEES[oldKey];
+    }
+    currentEventKey = newKey;
+    document.getElementById("attendee-title").textContent = `${currentFcEvent.title} (${currentFcEvent.startStr})`;
+  });
+
+  document.getElementById("event-delete-btn").addEventListener("click", () => {
+    if (!currentFcEvent) return;
+    if (!confirm("이 일정을 삭제할까요?")) return;
+    delete MOCK_ATTENDEES[currentEventKey];
+    currentFcEvent.remove();
+    attendeeModal.classList.remove("open");
+  });
+
+  function renderAttendeeModal() {
+    const data = MOCK_ATTENDEES[currentEventKey];
+    const chipsEl = document.getElementById("attendee-chips");
+    const noteEl = document.getElementById("attendee-note");
+
+    const myStatus = data
+      ? (data.going.includes(MOCK_ME.name) ? "going" : data.notGoing.includes(MOCK_ME.name) ? "notGoing" : null)
+      : null;
+    document.getElementById("rsvp-going").classList.toggle("picked", myStatus === "going");
+    document.getElementById("rsvp-not-going").classList.toggle("picked", myStatus === "notGoing");
+
+    if (!data || data.going.length === 0) {
+      chipsEl.innerHTML = "";
+      noteEl.textContent = "아직 참석한다고 응답한 크루원이 없습니다.";
+    } else {
+      chipsEl.innerHTML = data.going.map(n => `<span class="attendee-chip going">${n}</span>`).join("");
+      noteEl.textContent = "여기 없는 크루원은 아직 응답이 없거나 불참이에요 (docs/decisions/2026-08-12.md 참고).";
+    }
+  }
+
+  document.querySelectorAll(".rsvp-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!currentEventKey) return;
+      if (!MOCK_ATTENDEES[currentEventKey]) MOCK_ATTENDEES[currentEventKey] = { going: [], notGoing: [] };
+      const data = MOCK_ATTENDEES[currentEventKey];
+      data.going = data.going.filter(n => n !== MOCK_ME.name);
+      data.notGoing = data.notGoing.filter(n => n !== MOCK_ME.name);
+      (btn.dataset.status === "going" ? data.going : data.notGoing).push(MOCK_ME.name);
+      renderAttendeeModal();
+    });
+  });
+
+  document.getElementById("attendee-modal-close").addEventListener("click", () => attendeeModal.classList.remove("open"));
+  attendeeModal.addEventListener("click", (e) => { if (e.target === attendeeModal) attendeeModal.classList.remove("open"); });
+
+  // --- 일정 등록 모달 (OWNER/MANAGER 전용) ----------------------------------
+
+  const eventModal = document.getElementById("event-modal");
+
+  document.getElementById("add-event-btn").addEventListener("click", () => eventModal.classList.add("open"));
+  document.getElementById("event-modal-close").addEventListener("click", () => eventModal.classList.remove("open"));
+  eventModal.addEventListener("click", (e) => { if (e.target === eventModal) eventModal.classList.remove("open"); });
+
+  document.getElementById("event-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const title = document.getElementById("event-title-input").value.trim();
+    const date = document.getElementById("event-date-input").value;
+    if (!title || !date) return;
+
+    fcCalendar.addEvent({ title, start: date, extendedProps: { crew: crew.name, author: MOCK_ME.name } });
+    e.target.reset();
+    eventModal.classList.remove("open");
+  });
+
+  // --- 크루 소식 ---------------------------------------------------------
+
+  const crewPosts = (MOCK_POSTS[crewId] || []).slice();
+  crewPosts.forEach((p, i) => { p._key = i; if (!p.comments) p.comments = []; });
+
+  let activeTab = "all";
+  let expandedKey = null; // 지금 댓글이 펼쳐진 글 (다시 누르면 접힘)
+
+  const tabButtons = document.querySelectorAll(".community-tabs button");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeTab = btn.dataset.tab;
+      expandedKey = null;
+      renderPosts();
+    });
+  });
+
+  function renderPosts() {
+    const list = activeTab === "mine"
+      ? crewPosts.filter(p => p.author === MOCK_ME.name)
+      : crewPosts;
+
+    const listEl = document.getElementById("post-list");
+
+    if (list.length === 0) {
+      listEl.innerHTML = `<p class="page-subtitle">${activeTab === "mine" ? "아직 내가 쓴 글이 없어요." : "아직 글이 없어요."}</p>`;
+      return;
+    }
+
+    listEl.innerHTML = list.map(p => {
+      const isOpen = p._key === expandedKey;
+      return `
+      <div class="card post-item" data-key="${p._key}" style="cursor:pointer;">
+        <div class="post-head">
+          <span class="post-author">${p.author}</span>
+          <span class="post-date">${p.date}</span>
+          ${p.author === MOCK_ME.name ? `
+            <span class="comment-actions">
+              <button type="button" class="post-edit-btn" data-post-key="${p._key}">수정</button>
+              <button type="button" class="post-delete-btn" data-post-key="${p._key}">삭제</button>
+            </span>
+          ` : ""}
+        </div>
+        <div>${p.content}</div>
+        ${isOpen ? `
+          <div class="comment-section">
+            <div class="comment-heading">댓글 ${p.comments.length}개</div>
+            <div>${p.comments.map((c, ci) => `
+              <div class="comment-item">
+                <div class="comment-head">
+                  <span class="comment-author">${c.author}</span><span>${c.date}</span>
+                  ${(c.author === MOCK_ME.name || p.author === MOCK_ME.name) ? `
+                    <span class="comment-actions">
+                      <button type="button" class="comment-edit-btn" data-post-key="${p._key}" data-comment-index="${ci}">수정</button>
+                      <button type="button" class="comment-delete-btn" data-post-key="${p._key}" data-comment-index="${ci}">삭제</button>
+                    </span>
+                  ` : ""}
+                </div>
+                <div>${c.content}</div>
+              </div>
+            `).join("")}</div>
+            <form class="comment-form" data-key="${p._key}">
+              <input type="text" placeholder="댓글을 남겨보세요" required>
+              <button type="submit">등록</button>
+            </form>
+          </div>
+        ` : ""}
+      </div>
+    `;
+    }).join("");
+
+    listEl.querySelectorAll(".post-item").forEach(el => {
+      el.addEventListener("click", (e) => {
+        if (e.target.closest(".comment-section")) return;
+        const key = Number(el.dataset.key);
+        expandedKey = expandedKey === key ? null : key;
+        renderPosts();
+      });
+    });
+
+    listEl.querySelectorAll(".post-edit-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const post = crewPosts.find(p => p._key === Number(btn.dataset.postKey));
+        const next = prompt("글 수정", post.content);
+        if (next === null || !next.trim()) return;
+        post.content = next.trim();
+        renderPosts();
+      });
+    });
+
+    listEl.querySelectorAll(".post-delete-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!confirm("이 글을 삭제할까요? (댓글도 함께 삭제됩니다)")) return;
+        const idx = crewPosts.findIndex(p => p._key === Number(btn.dataset.postKey));
+        if (idx > -1) crewPosts.splice(idx, 1);
+        if (expandedKey === Number(btn.dataset.postKey)) expandedKey = null;
+        renderPosts();
+      });
+    });
+
+    listEl.querySelectorAll(".comment-form").forEach(form => {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const key = Number(form.dataset.key);
+        const post = crewPosts.find(p => p._key === key);
+        const input = form.querySelector("input");
+        const text = input.value.trim();
+        if (!text) return;
+        post.comments.push({ author: MOCK_ME.name, date: todayStr(), content: text });
+        renderPosts();
+      });
+    });
+
+    listEl.querySelectorAll(".comment-edit-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const post = crewPosts.find(p => p._key === Number(btn.dataset.postKey));
+        const comment = post.comments[Number(btn.dataset.commentIndex)];
+        const next = prompt("댓글 수정", comment.content);
+        if (next !== null && next.trim()) {
+          comment.content = next.trim();
+          renderPosts();
+        }
+      });
+    });
+
+    listEl.querySelectorAll(".comment-delete-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!confirm("댓글을 삭제할까요?")) return;
+        const post = crewPosts.find(p => p._key === Number(btn.dataset.postKey));
+        post.comments.splice(Number(btn.dataset.commentIndex), 1);
+        renderPosts();
+      });
+    });
+  }
+
+  document.getElementById("post-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("post-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    crewPosts.unshift({ author: MOCK_ME.name, date: todayStr(), content: text });
+    input.value = "";
+    renderPosts();
+  });
+
+  renderPosts();
+</script>
+</body>
+</html>

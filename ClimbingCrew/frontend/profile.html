@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내프로필 | ClimbingCrew</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <a class="brand" href="index.html"><span class="dot"></span>ClimbingCrew</a>
+  <nav class="app-nav">
+    <a href="profile.html" class="active">내프로필</a>
+    <a href="index.html">크루</a>
+    <a href="community.html">커뮤니티</a>
+  </nav>
+</header>
+<div class="mock-banner">가짜 데이터로 만든 화면입니다. 지도는 네이버 지도 API 키가 있어야 실제로 붙습니다.</div>
+
+<main>
+  <div class="profile-header">
+    <div>
+      <h1 class="page-title" id="my-name" style="margin:0;"></h1>
+      <p class="page-subtitle" id="my-last-visit" style="margin:12px 0 0;"></p>
+    </div>
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar" id="profile-avatar" title="눌러서 프로필 사진 변경">🧗</div>
+      <span class="profile-avatar-edit-hint">사진 변경</span>
+      <input type="file" id="profile-photo-input" accept="image/*" style="display:none;">
+    </div>
+  </div>
+
+  <div class="card info-summary-row">
+    <div class="info-summary-item">
+      <div class="info-summary-value" id="stat-gym-count"></div>
+      <div class="info-summary-label">방문 암장수</div>
+    </div>
+    <div class="info-summary-item">
+      <div class="info-summary-value" id="stat-visit-count"></div>
+      <div class="info-summary-label">총 방문 횟수</div>
+    </div>
+    <div class="info-summary-item">
+      <div class="info-summary-value" id="stat-avg-rating"></div>
+      <div class="info-summary-label">평균 별점</div>
+    </div>
+  </div>
+
+  <div class="calendar-header-row">
+    <div>
+      <h2 class="section-heading" style="margin-top:12px;">내가 다녀온 암장</h2>
+      <p class="page-subtitle" style="margin-top:-8px;">핀을 클릭하면 그 암장에 내가 남긴 평을 볼 수 있어요. (크루원 평은 각 크루 화면에서 확인)</p>
+    </div>
+    <button class="add-event-btn" id="add-review-btn">+ 리뷰 등록</button>
+  </div>
+
+  <div class="map-placeholder card" id="map-placeholder">
+    <span class="map-label">지도 자리 (네이버 지도 API 연동 예정)</span>
+  </div>
+
+  <div class="card review-panel" id="review-panel">
+    <h3 id="review-gym-name"></h3>
+    <p class="review-sub" id="review-gym-sub"></p>
+    <div id="review-items"></div>
+  </div>
+
+  <h2 class="section-heading">최근 방문 기록</h2>
+  <p class="page-subtitle" style="margin-top:-8px;">최근 5개만 보여드려요. 누르면 지도에서 바로 확인할 수 있어요.</p>
+  <div id="recent-visits-list"></div>
+</main>
+
+<!-- 리뷰 등록 모달 -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="review-modal-close">✕</button>
+    <h3 style="margin-top:0;">암장 리뷰 등록</h3>
+    <form class="event-form" id="review-form">
+      <label>암장 검색
+        <div class="gym-search-wrap">
+          <input type="text" id="review-gym-input" placeholder="암장 이름 또는 지역으로 검색 (예: 강남)" required autocomplete="off">
+          <div class="gym-search-results" id="gym-search-results"></div>
+        </div>
+      </label>
+
+      <label>사진
+        <input type="file" id="review-photo-input" accept="image/*">
+      </label>
+      <div class="photo-preview" id="review-photo-preview">사진을 선택하면 여기에 미리보기가 표시돼요</div>
+
+      <label>별점
+        <div class="star-picker" id="review-star-picker">
+          <span data-value="1">★</span><span data-value="2">★</span><span data-value="3">★</span><span data-value="4">★</span><span data-value="5">★</span>
+        </div>
+      </label>
+
+      <label>공개범위
+        <select id="review-visibility-select">
+          <option value="PUBLIC" selected>전체공개</option>
+          <option value="CREW_ONLY">크루공개</option>
+          <option value="PRIVATE">비공개</option>
+        </select>
+      </label>
+
+      <label>총평 (최대 200자)
+        <textarea id="review-content-input" maxlength="200" rows="3" required style="border:1px solid var(--color-border);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
+      </label>
+
+      <button type="submit" class="event-form-submit">등록</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script>
+  document.getElementById("my-name").textContent = MOCK_ME.name;
+
+  // --- 프로필 사진 (여기서만 등록/수정) -------------------------------------
+
+  function renderAvatar() {
+    document.getElementById("profile-avatar").innerHTML = MOCK_ME.photo
+      ? `<img src="${MOCK_ME.photo}" alt="프로필 사진">`
+      : "🧗";
+  }
+  renderAvatar();
+
+  const avatarInput = document.getElementById("profile-photo-input");
+  document.getElementById("profile-avatar").addEventListener("click", () => avatarInput.click());
+  document.querySelector(".profile-avatar-edit-hint").addEventListener("click", () => avatarInput.click());
+
+  avatarInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      MOCK_ME.photo = reader.result;
+      renderAvatar();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const visLabel = { PUBLIC: "전체공개", CREW_ONLY: "크루공개", PRIVATE: "비공개" };
+  const mapEl = document.getElementById("map-placeholder");
+
+  // --- 리뷰 등록 -----------------------------------------------------------
+
+  const reviewModal = document.getElementById("review-modal");
+
+  // 암장 검색 — 이름 또는 지역(주소)으로 검색
+  const gymInput = document.getElementById("review-gym-input");
+  const gymResultsEl = document.getElementById("gym-search-results");
+
+  gymInput.addEventListener("input", () => {
+    const q = gymInput.value.trim();
+    if (!q) { gymResultsEl.classList.remove("open"); return; }
+
+    const matches = MOCK_GYMS.filter(g => g.name.includes(q) || g.address.includes(q));
+    if (matches.length === 0) {
+      gymResultsEl.innerHTML = `<div class="gym-search-result-item" style="color:var(--color-text-muted);">검색 결과가 없어요</div>`;
+      gymResultsEl.classList.add("open");
+      return;
+    }
+
+    gymResultsEl.innerHTML = matches.map(g => `
+      <div class="gym-search-result-item" data-gym-id="${g.id}">
+        <span class="gsr-name">${g.name}</span><span class="gsr-address">${g.address}</span>
+      </div>
+    `).join("");
+    gymResultsEl.classList.add("open");
+
+    gymResultsEl.querySelectorAll(".gym-search-result-item[data-gym-id]").forEach(item => {
+      item.addEventListener("click", () => {
+        const gym = MOCK_GYMS.find(g => g.id === Number(item.dataset.gymId));
+        gymInput.value = gym.name;
+        gymResultsEl.classList.remove("open");
+      });
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".gym-search-wrap")) gymResultsEl.classList.remove("open");
+  });
+
+  document.getElementById("add-review-btn").addEventListener("click", () => reviewModal.classList.add("open"));
+  document.getElementById("review-modal-close").addEventListener("click", () => reviewModal.classList.remove("open"));
+  reviewModal.addEventListener("click", (e) => { if (e.target === reviewModal) reviewModal.classList.remove("open"); });
+
+  // 사진 업로드 미리보기 (파일 선택만, 실제 서버 업로드는 없음 — mock)
+  let selectedPhotoDataUrl = null;
+  document.getElementById("review-photo-input").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    const previewEl = document.getElementById("review-photo-preview");
+    if (!file) {
+      selectedPhotoDataUrl = null;
+      previewEl.innerHTML = "사진을 선택하면 여기에 미리보기가 표시돼요";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedPhotoDataUrl = reader.result;
+      previewEl.innerHTML = `<img src="${selectedPhotoDataUrl}" alt="미리보기">`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // 별점 위젯
+  let selectedRating = 4;
+  const starEls = document.querySelectorAll("#review-star-picker span");
+  function paintStars(rating) {
+    starEls.forEach(s => s.classList.toggle("filled", Number(s.dataset.value) <= rating));
+  }
+  paintStars(selectedRating);
+  starEls.forEach(s => {
+    s.addEventListener("click", () => {
+      selectedRating = Number(s.dataset.value);
+      paintStars(selectedRating);
+    });
+  });
+
+  document.getElementById("review-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const gymName = document.getElementById("review-gym-input").value.trim();
+    const gym = MOCK_GYMS.find(g => g.name === gymName);
+    if (!gym) { alert("목록에 있는 암장 이름을 정확히 선택해주세요."); return; }
+
+    const content = document.getElementById("review-content-input").value.trim();
+    if (!content) return;
+
+    if (!MOCK_REVIEWS[gym.id]) MOCK_REVIEWS[gym.id] = [];
+    MOCK_REVIEWS[gym.id].push({
+      author: MOCK_ME.name,
+      date: todayStr(),
+      visibility: document.getElementById("review-visibility-select").value,
+      rating: selectedRating,
+      photo: selectedPhotoDataUrl || "🧗",
+      content: content.slice(0, 200),
+    });
+
+    e.target.reset();
+    selectedPhotoDataUrl = null;
+    document.getElementById("review-photo-preview").innerHTML = "사진을 선택하면 여기에 미리보기가 표시돼요";
+    selectedRating = 4;
+    paintStars(selectedRating);
+
+    reviewModal.classList.remove("open");
+    openGymId = null;
+    renderMap();
+    toggleMyReviews(gym.id); // 등록한 암장의 평을 바로 열어서 보여줌
+  });
+
+  let activity = [];
+  let openGymId = null;
+
+  function renderProfileSummary() {
+    const flat = getMyReviewsFlat();
+    const gymCount = new Set(flat.map(f => f.gym.id)).size;
+    const visitCount = flat.length;
+    const avgRating = visitCount ? (flat.reduce((s, f) => s + f.review.rating, 0) / visitCount).toFixed(1) : "-";
+
+    document.getElementById("stat-gym-count").textContent = gymCount;
+    document.getElementById("stat-visit-count").textContent = visitCount;
+    document.getElementById("stat-avg-rating").textContent = visitCount ? `★ ${avgRating}` : "-";
+
+    document.getElementById("my-last-visit").textContent = flat.length > 0
+      ? `마지막 방문 · ${flat[0].gym.name} (${flat[0].review.date})`
+      : "아직 방문 기록이 없어요";
+
+    const recentEl = document.getElementById("recent-visits-list");
+    const recent5 = flat.slice(0, 5);
+    if (recent5.length === 0) {
+      recentEl.innerHTML = `<p class="page-subtitle">아직 방문 기록이 없어요.</p>`;
+      return;
+    }
+    recentEl.innerHTML = recent5.map(f => `
+      <div class="card member-row" data-gym-id="${f.gym.id}">
+        <div>
+          <span class="member-row-name">${f.gym.name}</span>
+          <span class="review-card-date" style="margin-left:8px;">${f.review.date}</span>
+        </div>
+        <span class="review-card-stars">${starString(f.review.rating)}</span>
+      </div>
+    `).join("");
+    recentEl.querySelectorAll(".member-row").forEach(row => {
+      row.addEventListener("click", () => {
+        const gymId = Number(row.dataset.gymId);
+        mapEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        openGymId = null;
+        toggleMyReviews(gymId);
+      });
+    });
+  }
+
+  function renderMap() {
+    renderProfileSummary();
+    activity = getMyGymActivity();
+    mapEl.querySelectorAll(".pin, .empty-note").forEach(el => el.remove());
+
+    if (activity.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "page-subtitle empty-note";
+      empty.style.cssText = "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;";
+      empty.textContent = "아직 남긴 평이 없어요.";
+      mapEl.appendChild(empty);
+      document.getElementById("review-panel").classList.remove("open");
+      openGymId = null;
+      return;
+    }
+
+    activity.forEach(({ gym, reviews }) => {
+      const pin = document.createElement("div");
+      pin.className = "pin";
+      pin.style.left = gym.x;
+      pin.style.top = gym.y;
+      pin.onclick = () => toggleMyReviews(gym.id);
+      pin.innerHTML = `
+        <span class="pin-icon">📍</span>
+        <span class="pin-label">${gym.name} · <span class="pin-count">${reviews.length}</span></span>
+      `;
+      mapEl.appendChild(pin);
+    });
+
+    // 삭제로 리뷰가 0개가 된 암장은 패널을 자동으로 닫는다
+    if (openGymId !== null && !activity.find(a => a.gym.id === openGymId)) {
+      document.getElementById("review-panel").classList.remove("open");
+      openGymId = null;
+    } else if (openGymId !== null) {
+      renderReviewPanel(openGymId);
+    }
+  }
+
+  function toggleMyReviews(gymId) {
+    const panel = document.getElementById("review-panel");
+
+    if (openGymId === gymId) {
+      panel.classList.remove("open");
+      openGymId = null;
+      return;
+    }
+
+    openGymId = gymId;
+    renderReviewPanel(gymId);
+    panel.classList.add("open");
+  }
+
+  function renderReviewPanel(gymId) {
+    const found = activity.find(a => a.gym.id === gymId);
+    if (!found) return;
+
+    document.getElementById("review-gym-name").textContent = found.gym.name;
+    document.getElementById("review-gym-sub").textContent = `${found.gym.address} · 내가 남긴 평 ${found.reviews.length}개`;
+
+    document.getElementById("review-items").innerHTML = `<div class="review-card-row">` + found.reviews.map((r, ri) => `
+      <div class="review-card">
+        <div class="review-card-photo">${r.photo}</div>
+        <div class="review-card-top">
+          <span class="review-card-stars">${starString(r.rating)}</span>
+          <span class="visibility-tag">${visLabel[r.visibility]}</span>
+        </div>
+        <div class="review-card-date">${r.date}</div>
+        <div class="review-card-memo">${r.content}</div>
+        <div class="item-actions">
+          <button type="button" class="review-edit-btn" data-gym-id="${gymId}" data-review-index="${ri}">수정</button>
+          <button type="button" class="review-delete-btn" data-gym-id="${gymId}" data-review-index="${ri}">삭제</button>
+        </div>
+      </div>
+    `).join("") + `</div>`;
+
+    document.querySelectorAll(".review-edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const r = found.reviews[Number(btn.dataset.reviewIndex)];
+        const newContent = prompt("평 수정 (최대 200자)", r.content);
+        if (newContent === null || !newContent.trim()) return;
+        if (newContent.trim().length > 200) { alert("200자 이내로 작성해주세요."); return; }
+        const newRatingStr = prompt("별점 (1~5)", String(r.rating));
+        if (newRatingStr === null) return;
+        const newRating = Math.min(5, Math.max(1, parseInt(newRatingStr, 10) || r.rating));
+        r.content = newContent.trim();
+        r.rating = newRating;
+        renderReviewPanel(gymId);
+      });
+    });
+
+    document.querySelectorAll(".review-delete-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!confirm("이 평을 삭제할까요?")) return;
+        const r = found.reviews[Number(btn.dataset.reviewIndex)];
+        const gymReviews = MOCK_REVIEWS[Number(btn.dataset.gymId)];
+        const idx = gymReviews.indexOf(r);
+        if (idx > -1) gymReviews.splice(idx, 1);
+        renderMap();
+      });
+    });
+  }
+
+  renderMap();
+</script>
+</body>
+</html>

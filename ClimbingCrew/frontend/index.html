@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 크루 | ClimbingCrew</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <a class="brand" href="index.html"><span class="dot"></span>ClimbingCrew</a>
+  <nav class="app-nav">
+    <a href="profile.html">내프로필</a>
+    <a href="index.html" class="active">크루</a>
+    <a href="community.html">커뮤니티</a>
+  </nav>
+</header>
+<div class="mock-banner">가짜 데이터로 만든 화면입니다. 실제 API가 준비되면 하나씩 진짜 데이터로 바뀝니다.</div>
+
+<main>
+  <div class="board-tabs" id="crew-tabs">
+    <button data-tab="joined" class="active">내가 가입한 크루</button>
+    <button data-tab="discover">크루 찾아보기</button>
+  </div>
+
+  <!-- 내가 가입한 크루 -->
+  <div id="joined-view">
+    <p class="page-subtitle" id="greeting"></p>
+    <form id="joined-search-form" style="display:flex;gap:8px;margin-bottom:18px;">
+      <input type="text" id="joined-search-input" placeholder="크루 이름으로 검색" style="border:1px solid var(--color-border);border-radius:999px;padding:9px 16px;font-family:inherit;font-size:0.9rem;width:100%;max-width:320px;">
+      <button type="submit" class="add-event-btn">검색</button>
+    </form>
+    <div class="crew-grid" id="crew-grid"></div>
+  </div>
+
+  <!-- 크루 찾아보기 -->
+  <div id="discover-view" style="display:none;">
+    <p class="page-subtitle">가입 신청을 하면 크루장/매니저의 승인을 기다리는 상태가 돼요.</p>
+    <form id="discover-search-form" style="display:flex;gap:8px;margin-bottom:18px;">
+      <input type="text" id="discover-search-input" placeholder="크루 이름으로 검색" style="border:1px solid var(--color-border);border-radius:999px;padding:9px 16px;font-family:inherit;font-size:0.9rem;width:100%;max-width:320px;">
+      <button type="submit" class="add-event-btn">검색</button>
+    </form>
+    <div class="crew-grid" id="discover-grid"></div>
+  </div>
+</main>
+
+<script src="js/mock-data.js"></script>
+<script>
+  const roleLabel = { OWNER: "OWNER", MANAGER: "MANAGER", MEMBER: "MEMBER" };
+  const roleClass = { OWNER: "role-owner", MANAGER: "role-manager", MEMBER: "role-member" };
+
+  document.getElementById("greeting").textContent =
+    MOCK_ME.name + "님, 안녕하세요. " + MOCK_CREWS.length + "개 크루에 가입되어 있어요. 카드를 누르면 크루 화면으로 이동합니다.";
+
+  const grid = document.getElementById("crew-grid");
+  function renderJoinedCrews() {
+    const query = document.getElementById("joined-search-input").value.trim();
+    const filtered = query ? MOCK_CREWS.filter(c => c.name.includes(query)) : MOCK_CREWS;
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<p class="page-subtitle">검색 결과가 없어요.</p>`;
+      return;
+    }
+
+    grid.innerHTML = "";
+    filtered.forEach(crew => {
+      const card = document.createElement("a");
+      card.className = "card crew-card";
+      card.href = `crew.html?id=${crew.id}`;
+      card.innerHTML = `
+        <div class="crew-emoji">${crew.emoji}</div>
+        <span class="role-badge ${roleClass[crew.role]}">${roleLabel[crew.role]}</span>
+        <div class="crew-name">${crew.name}</div>
+        <div class="crew-meta">크루원 ${crew.memberCount}명</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+  renderJoinedCrews();
+  document.getElementById("joined-search-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    renderJoinedCrews();
+  });
+
+  // --- 탭 전환 --------------------------------------------------------------
+
+  const tabButtons = document.querySelectorAll("#crew-tabs button");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("joined-view").style.display = btn.dataset.tab === "joined" ? "block" : "none";
+      document.getElementById("discover-view").style.display = btn.dataset.tab === "discover" ? "block" : "none";
+    });
+  });
+
+  // --- 크루 찾아보기 (가입 신청) ---------------------------------------------
+
+  const requestedCrewIds = new Set();
+
+  function renderDiscoverCrews() {
+    const query = document.getElementById("discover-search-input").value.trim();
+    const filtered = query
+      ? MOCK_DISCOVER_CREWS.filter(c => c.name.includes(query) || c.desc.includes(query))
+      : MOCK_DISCOVER_CREWS;
+
+    const discoverGrid = document.getElementById("discover-grid");
+
+    if (filtered.length === 0) {
+      discoverGrid.innerHTML = `<p class="page-subtitle">검색 결과가 없어요.</p>`;
+      return;
+    }
+
+    discoverGrid.innerHTML = filtered.map(crew => `
+      <div class="card crew-card" style="cursor:default;" data-crew-id="${crew.id}">
+        <div class="crew-emoji">${crew.emoji}</div>
+        <div class="crew-name">${crew.name}</div>
+        <div class="crew-meta">크루원 ${crew.memberCount}명</div>
+        <p class="page-subtitle" style="margin:2px 0 8px;font-size:0.82rem;">${crew.desc}</p>
+        <button type="button" class="add-event-btn join-request-btn" data-crew-id="${crew.id}"
+          style="align-self:flex-start;${requestedCrewIds.has(crew.id) ? "background:var(--color-border);color:var(--color-text-muted);cursor:default;" : ""}">
+          ${requestedCrewIds.has(crew.id) ? "신청됨 (승인 대기중)" : "가입 신청"}
+        </button>
+      </div>
+    `).join("");
+
+    discoverGrid.querySelectorAll(".join-request-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.crewId);
+        if (requestedCrewIds.has(id)) return;
+        requestedCrewIds.add(id);
+        renderDiscoverCrews();
+      });
+    });
+  }
+  renderDiscoverCrews();
+  document.getElementById("discover-search-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    renderDiscoverCrews();
+  });
+</script>
+</body>
+</html>
