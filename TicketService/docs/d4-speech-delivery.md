@@ -5,7 +5,7 @@
 
 ## 1. 3~5분 스피치 — 주제: 헥사고날 아키텍처
 
-**녹화 링크(Google Drive, 제한 공개)**: https://drive.google.com/file/d/1I94jo9V-p-hbR5tvAy8soJFhlZy2V7U5/view?usp=drive_link
+**녹화 링크(Google Drive, 제한 공개)**: https://drive.google.com/file/d/1I94jo9V-p-hbR5tvAy8soJFhlZy2V7U5/view?usp=sharing
 (음성 파일 원본은 GitHub 저장소가 Public이라 올리지 않고, 접근 제어가 되는 Google Drive에만 보관한다.)
 
 **중요**: 대본을 외워 읽지 않고, 아래 구조(talking point)만 참고해서 그때그때 자연스럽게 말하는 것이 과제 취지. 아래는 전체 문장이 아니라 "이 파트에서 무슨 말을 할지"에 대한 뼈대만 잡아둔 것.
