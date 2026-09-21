@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.climbingcrew'
+version = '0.1.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // H2: 인메모리 DB. Docker 없이 빠르게 계약 테스트를 돌리기 위해
+    // TicketService의 Testcontainers+Postgres 대신 선택함 (E-5 문서에 사유 기록).
+    runtimeOnly 'com.h2database:h2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// 표준 'test' 태스크가 이 개발 환경에서 워커 프로세스 부트스트랩 단계에
+// ClassNotFoundException을 내며 실행되지 않는 문제의 우회책.
+// (원인 불명 — docs/e5-pipeline/README.md 참고. 다른 환경에서는 './gradlew test'가
+// 정상 동작할 가능성이 높으니, 문제없이 되면 이 태스크 대신 표준 test를 써도 된다.)
+tasks.register('runDirectTests', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'direct.DirectTestRunner'
+}
